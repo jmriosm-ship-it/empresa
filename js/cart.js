@@ -4,6 +4,9 @@
   El carrito se guarda en localStorage del navegador, así que se mantiene
   aunque el cliente cierre la pestaña y vuelva más tarde (mientras use el
   mismo navegador). No necesita servidor.
+
+  Cada línea del carrito se identifica por id + size, para que la misma
+  prenda en dos tallas distintas aparezca como dos líneas separadas.
 */
 
 const CART_KEY = "synkd_cart";
@@ -21,27 +24,27 @@ function saveCart(cart) {
   updateCartBadge();
 }
 
-function addToCart(product, qty = 1) {
+function addToCart(product, qty = 1, size = null) {
   const cart = getCart();
-  const existing = cart.find((item) => item.id === product.id);
+  const existing = cart.find((item) => item.id === product.id && item.size === size);
   if (existing) {
     existing.qty += qty;
   } else {
-    cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, qty });
+    cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, size, qty });
   }
   saveCart(cart);
 }
 
-function updateQty(id, qty) {
+function updateQty(id, size, qty) {
   let cart = getCart();
   cart = cart
-    .map((item) => (item.id === id ? { ...item, qty } : item))
+    .map((item) => (item.id === id && item.size === size ? { ...item, qty } : item))
     .filter((item) => item.qty > 0);
   saveCart(cart);
 }
 
-function removeFromCart(id) {
-  const cart = getCart().filter((item) => item.id !== id);
+function removeFromCart(id, size) {
+  const cart = getCart().filter((item) => !(item.id === id && item.size === size));
   saveCart(cart);
 }
 

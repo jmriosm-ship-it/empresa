@@ -67,6 +67,7 @@
 <script src="js/products.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/main.js"></script>
+
 <script>
   const grid = document.getElementById("product-grid");
   const tabs = document.querySelectorAll(".tab");
@@ -79,29 +80,34 @@
       const card = document.createElement("div");
       card.className = "card";
       card.style.animationDelay = (i * 0.04) + "s";
-      card.innerHTML = `
-        <div class="card-media">
-          ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span class="placeholder">PHOTO COMING SOON</span>`}
-        </div>
-        <div class="card-body">
-          <h3>${p.name}</h3>
-          <p class="card-price">$${p.price} USD</p>
-          <div class="card-foot">
-            <button class="add-btn" data-id="${p.id}">Add to cart</button>
-          </div>
-        </div>`;
-      grid.appendChild(card);
-    });
+const sizeOptions = p.sizes.map(s => `<option value="${s}">${s}</option>`).join("");
+card.innerHTML = `
+  <div class="card-media">
+    ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span class="placeholder">PHOTO COMING SOON</span>`}
+  </div>
+  <div class="card-body">
+    <h3>${p.name}</h3>
+    <p class="card-price">$${p.price} USD</p>
+    <select class="size-select" data-id="${p.id}">${sizeOptions}</select>
+    <div class="card-foot">
+      <button class="add-btn" data-id="${p.id}">Add to cart</button>
+    </div>
+  </div>`;
+grid.appendChild(card);
+});
 
-    grid.querySelectorAll(".add-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const product = PRODUCTS.find(p => p.id === btn.dataset.id);
-        addToCart(product, 1);
-        btn.textContent = "Added ✓";
-        btn.classList.add("added");
-        setTimeout(() => { btn.textContent = "Add to cart"; btn.classList.remove("added"); }, 1200);
-      });
-    });
+grid.querySelectorAll(".add-btn").forEach(btn => {
+btn.addEventListener("click", () => {
+  const product = PRODUCTS.find(p => p.id === btn.dataset.id);
+  const sizeSelect = btn.closest(".card").querySelector(".size-select");
+  const size = sizeSelect.value;
+  addToCart(product, 1, size);
+  btn.textContent = "Added ✓";
+  btn.classList.add("added");
+  setTimeout(() => { btn.textContent = "Add to cart"; btn.classList.remove("added"); }, 1200);
+});
+});
+
   }
 
   function setActiveTab(cat) {
