@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — SYNKD Streetwear</title>
+<link rel="stylesheet" href="css/style.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .admin-wrap{ max-width:900px; margin:0 auto; padding:40px 24px 100px; }
+  .admin-box{
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:var(--radius-md); padding:28px; margin-bottom:24px;
+  }
+  .admin-box h3{ font-family:var(--font-display); font-size:22px; margin-bottom:16px; text-transform:uppercase; }
+  .admin-field{ margin-bottom:14px; }
+  .admin-field label{ display:block; font-size:12px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .admin-field input, .admin-field select{
+    width:100%; background:var(--bg); border:1px solid var(--line); border-radius:10px;
+    padding:11px 14px; color:var(--text); font-family:var(--font-body); font-size:14px;
+  }
+  .admin-checks{ display:flex; gap:10px; flex-wrap:wrap; }
+  .admin-checks label{
+    display:flex; align-items:center; gap:6px; background:var(--bg);
+    border:1px solid var(--line); border-radius:var(--radius-pill);
+    padding:8px 14px; font-size:13px; cursor:pointer;
+  }
+  .btn-primary{
+    background:var(--accent); color:#fff; border:none; border-radius:var(--radius-pill);
+    padding:13px 26px; font-size:14px; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.5px; cursor:pointer; transition:transform .2s ease, background .2s ease;
+  }
+  .btn-primary:hover{ background:var(--accent-dim); transform:translateY(-2px); }
+  .btn-danger{
+    background:none; border:1px solid #c0533e; color:#c0533e; border-radius:var(--radius-pill);
+    padding:8px 16px; font-size:12px; cursor:pointer; text-transform:uppercase;
+  }
+  .admin-product-row{
+    display:flex; align-items:center; gap:14px; padding:14px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .admin-thumb{
+    width:54px; height:54px; border-radius:10px; object-fit:cover;
+    background:var(--frame); flex-shrink:0;
+  }
+  .admin-product-info{ flex:1; }
+  .admin-product-info h4{ font-size:14px; font-weight:700; text-transform:uppercase; }
+  .admin-product-info span{ font-size:13px; color:var(--text-dim); }
+  .admin-msg{ font-size:13px; margin-top:10px; }
+  .admin-msg.ok{ color:#7a8c5c; }
+  .admin-msg.err{ color:#c0533e; }
+  #adminPanel{ display:none; }
+</style>
+</head>
+<body class="page-fade">
+
+<header class="site-header">
+  <a href="index.html" class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 8l4 4 5-8 5 8 4-4-2 10H5L3 8z"/>
+    </svg>
+    SYNKD
+  </a>
+</header>
+
+<div class="admin-wrap">
+
+  <!-- LOGIN -->
+  <div class="admin-box" id="loginBox">
+    <h3>Admin Login</h3>
+    <div class="admin-field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="you@email.com">
+    </div>
+    <div class="admin-field">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••">
+    </div>
+    <button class="btn-primary" id="loginBtn">Log In</button>
+    <p class="admin-msg" id="loginMsg"></p>
+  </div>
+
+  <!-- ADMIN PANEL (hidden until logged in) -->
+  <div id="adminPanel">
+
+    <div class="admin-box" style="display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-size:14px; color:var(--text-dim);">Logged in as <span id="loggedEmail"></span></span>
+      <button class="btn-danger" id="logoutBtn">Log out</button>
+    </div>
+
+    <div class="admin-box">
+      <h3>Add product</h3>
+      <div class="admin-field">
+        <label>Name</label>
+        <input type="text" id="pName" placeholder="Black LV">
+      </div>
+      <div class="admin-field">
+        <label>Price (USD)</label>
+        <input type="number" id="pPrice" placeholder="55">
+      </div>
+      <div class="admin-field">
+        <label>Category</label>
+        <select id="pCategory">
+          <option value="tshirts">T-Shirts</option>
+          <option value="shorts">Shorts</option>
+          <option value="alo">Alo</option>
+        </select>
+      </div>
+      <div class="admin-field">
+        <label>Available sizes</label>
+        <div class="admin-checks">
+          <label><input type="checkbox" value="S" checked> S</label>
+          <label><input type="checkbox" value="M" checked> M</label>
+          <label><input type="checkbox" value="L" checked> L</label>
+          <label><input type="checkbox" value="XL" checked> XL</label>
+          <label><input type="checkbox" value="XXL" checked> XXL</label>
+        </div>
+      </div>
+      <div class="admin-field">
+        <label>Photo</label>
+        <input type="file" id="pImage" accept="image/*">
+      </div>
+      <button class="btn-primary" id="addProductBtn">Add product</button>
+      <p class="admin-msg" id="addMsg"></p>
+    </div>
+
+    <div class="admin-box">
+      <h3>Current products</h3>
+      <div id="productList">Loading…</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ⚠️ La "publishable key" es segura de tener aquí visible, no es una contraseña.
+  const SUPABASE_URL = "https://zqjsvrrsbtovdilflkbp.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_2GuIxS-f8B4czOyCxc-KdQ_J-X7AxYY";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const loginBox = document.getElementById("loginBox");
+  const adminPanel = document.getElementById("adminPanel");
+  const loginMsg = document.getElementById("loginMsg");
+
+  async function checkSession() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      loginBox.style.display = "none";
+      adminPanel.style.display = "block";
+      document.getElementById("loggedEmail").textContent = session.user.email;
+      loadProducts();
+    } else {
+      loginBox.style.display = "block";
+      adminPanel.style.display = "none";
+    }
+  }
+
+  document.getElementById("loginBtn").addEventListener("click", async () => {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    loginMsg.textContent = "Logging in…";
+    loginMsg.className = "admin-msg";
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      loginMsg.textContent = error.message;
+      loginMsg.className = "admin-msg err";
+    } else {
+      checkSession();
+    }
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    await sb.auth.signOut();
+    checkSession();
+  });
+
+  async function loadProducts() {
+    const listEl = document.getElementById("productList");
+    const { data, error } = await sb.from("products").select("*").order("created_at", { ascending: false });
+    if (error) {
+      listEl.innerHTML = `<p class="admin-msg err">${error.message}</p>`;
+      return;
+    }
+    if (!data.length) {
+      listEl.innerHTML = `<p style="color:var(--text-dim); font-size:14px;">No products yet.</p>`;
+      return;
+    }
+    listEl.innerHTML = data.map(p => `
+      <div class="admin-product-row">
+        <img class="admin-thumb" src="${p.image_url || ''}" onerror="this.style.background='var(--frame)'">
+        <div class="admin-product-info">
+          <h4>${p.name}</h4>
+          <span>$${p.price} USD · ${p.category} · ${(p.sizes || []).join(", ")}</span>
+        </div>
+        <button class="btn-danger" data-delete="${p.id}" data-image="${p.image_url || ''}">Delete</button>
+      </div>
+    `).join("");
+
+    listEl.querySelectorAll("[data-delete]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("Delete this product?")) return;
+        const id = btn.dataset.delete;
+        await sb.from("products").delete().eq("id", id);
+        loadProducts();
+      });
+    });
+  }
+
+  document.getElementById("addProductBtn").addEventListener("click", async () => {
+    const addMsg = document.getElementById("addMsg");
+    const name = document.getElementById("pName").value.trim();
+    const price = parseFloat(document.getElementById("pPrice").value);
+    const category = document.getElementById("pCategory").value;
+    const sizes = Array.from(document.querySelectorAll(".admin-checks input:checked")).map(cb => cb.value);
+    const file = document.getElementById("pImage").files[0];
+
+    if (!name || !price || sizes.length === 0) {
+      addMsg.textContent = "Please fill in name, price, and at least one size.";
+      addMsg.className = "admin-msg err";
+      return;
+    }
+
+    addMsg.textContent = "Saving…";
+    addMsg.className = "admin-msg";
+
+    let imageUrl = "";
+    if (file) {
+      const filePath = `${Date.now()}-${file.name}`;
+      const { error: uploadError } = await sb.storage.from("product-images").upload(filePath, file);
+      if (uploadError) {
+        addMsg.textContent = "Image upload failed: " + uploadError.message;
+        addMsg.className = "admin-msg err";
+        return;
+      }
+      const { data: publicUrlData } = sb.storage.from("product-images").getPublicUrl(filePath);
+      imageUrl = publicUrlData.publicUrl;
+    }
+
+    const { error: insertError } = await sb.from("products").insert({
+      name, price, category, sizes, image_url: imageUrl
+    });
+
+    if (insertError) {
+      addMsg.textContent = insertError.message;
+      addMsg.className = "admin-msg err";
+      return;
+    }
+
+    addMsg.textContent = "Product added!";
+    addMsg.className = "admin-msg ok";
+    document.getElementById("pName").value = "";
+    document.getElementById("pPrice").value = "";
+    document.getElementById("pImage").value = "";
+    loadProducts();
+  });
+
+  checkSession();
+</script>
+
+</body>
+</html>
