@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="page-fade">
-
+ 
 <header class="site-header">
   <a href="index.html" class="logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -23,7 +23,7 @@
     <button class="menu-btn" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </header>
-
+ 
 <div class="drawer-overlay"></div>
 <nav class="drawer">
   <button class="drawer-close" aria-label="Close menu">✕</button>
@@ -42,79 +42,89 @@
     WhatsApp 551 312-8280
   </div>
 </nav>
-
+ 
 <div class="section-head">
   <div>
     <div class="meta"><span>2026</span><span>SEPTEMBER</span></div>
     <h2 id="shop-title">SHOP</h2>
   </div>
 </div>
-
+ 
 <div class="tabs" id="tabs">
   <button class="tab" data-cat="all">All</button>
   <button class="tab" data-cat="tshirts">T-Shirts</button>
   <button class="tab" data-cat="shorts">Shorts</button>
   <button class="tab" data-cat="alo">Alo</button>
 </div>
-
+ 
 <div class="grid" id="product-grid"></div>
-
+ 
 <footer class="footer-panel">
   <div class="handle">@SYNKD.<br/>STREETWEAR</div>
   <p>You are just one step away from holding the product you've always dreamed of in your hands.</p>
 </footer>
-
+ 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/products.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/main.js"></script>
-
 <script>
+  const SUPABASE_URL = "https://zqjsvrrsbtovdilflkbp.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_2GuIxS-f8B4czOyCxc-KdQ_J-X7AxYY";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+ 
+  let PRODUCTS = [];
   const grid = document.getElementById("product-grid");
   const tabs = document.querySelectorAll(".tab");
   const titleEl = document.getElementById("shop-title");
-
+ 
   function renderProducts(category) {
     const items = category === "all" ? PRODUCTS : PRODUCTS.filter(p => p.category === category);
     grid.innerHTML = "";
+ 
+    if (items.length === 0) {
+      grid.innerHTML = `<p style="padding:60px 24px; color:var(--text-dim); grid-column:1/-1; text-align:center;">No products here yet — check back soon.</p>`;
+      return;
+    }
+ 
     items.forEach((p, i) => {
       const card = document.createElement("div");
       card.className = "card";
       card.style.animationDelay = (i * 0.04) + "s";
-const sizeOptions = p.sizes.map(s => `<option value="${s}">${s}</option>`).join("");
-card.innerHTML = `
-  <div class="card-media">
-    ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span class="placeholder">PHOTO COMING SOON</span>`}
-  </div>
-  <div class="card-body">
-    <h3>${p.name}</h3>
-    <p class="card-price">$${p.price} USD</p>
-    <select class="size-select" data-id="${p.id}">${sizeOptions}</select>
-    <div class="card-foot">
-      <button class="add-btn" data-id="${p.id}">Add to cart</button>
-    </div>
-  </div>`;
-grid.appendChild(card);
-});
-
-grid.querySelectorAll(".add-btn").forEach(btn => {
-btn.addEventListener("click", () => {
-  const product = PRODUCTS.find(p => p.id === btn.dataset.id);
-  const sizeSelect = btn.closest(".card").querySelector(".size-select");
-  const size = sizeSelect.value;
-  addToCart(product, 1, size);
-  btn.textContent = "Added ✓";
-  btn.classList.add("added");
-  setTimeout(() => { btn.textContent = "Add to cart"; btn.classList.remove("added"); }, 1200);
-});
-});
-
+      const sizeOptions = p.sizes.map(s => `<option value="${s}">${s}</option>`).join("");
+      card.innerHTML = `
+        <div class="card-media">
+          ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span class="placeholder">PHOTO COMING SOON</span>`}
+        </div>
+        <div class="card-body">
+          <h3>${p.name}</h3>
+          <p class="card-price">$${p.price} USD</p>
+          <select class="size-select" data-id="${p.id}">${sizeOptions}</select>
+          <div class="card-foot">
+            <button class="add-btn" data-id="${p.id}">Add to cart</button>
+          </div>
+        </div>`;
+      grid.appendChild(card);
+    });
+ 
+    grid.querySelectorAll(".add-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const product = PRODUCTS.find(p => p.id === btn.dataset.id);
+        const sizeSelect = btn.closest(".card").querySelector(".size-select");
+        const size = sizeSelect.value;
+        addToCart(product, 1, size);
+        btn.textContent = "Added ✓";
+        btn.classList.add("added");
+        setTimeout(() => { btn.textContent = "Add to cart"; btn.classList.remove("added"); }, 1200);
+      });
+    });
   }
-
+ 
   function setActiveTab(cat) {
     tabs.forEach(t => t.classList.toggle("active", t.dataset.cat === cat));
     titleEl.textContent = cat === "all" ? "SHOP" : CATEGORY_LABELS[cat].toUpperCase();
   }
-
+ 
   tabs.forEach(tab => {
     tab.addEventListener("click", () => {
       const cat = tab.dataset.cat;
@@ -123,11 +133,33 @@ btn.addEventListener("click", () => {
       renderProducts(cat);
     });
   });
-
-  const params = new URLSearchParams(window.location.search);
-  const initialCat = params.get("cat") && CATEGORY_LABELS[params.get("cat")] ? params.get("cat") : "all";
-  setActiveTab(initialCat);
-  renderProducts(initialCat);
+ 
+  async function loadProducts() {
+    grid.innerHTML = `<p style="padding:60px 24px; color:var(--text-dim); grid-column:1/-1; text-align:center;">Loading products…</p>`;
+ 
+    const { data, error } = await sb.from("products").select("*").order("created_at", { ascending: false });
+ 
+    if (error) {
+      grid.innerHTML = `<p style="padding:60px 24px; color:#c0533e; grid-column:1/-1; text-align:center;">Could not load products right now.</p>`;
+      return;
+    }
+ 
+    PRODUCTS = data.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      category: p.category,
+      sizes: (p.sizes && p.sizes.length) ? p.sizes : ["S", "M", "L", "XL", "XXL"],
+      image: p.image_url,
+    }));
+ 
+    const params = new URLSearchParams(window.location.search);
+    const initialCat = params.get("cat") && CATEGORY_LABELS[params.get("cat")] ? params.get("cat") : "all";
+    setActiveTab(initialCat);
+    renderProducts(initialCat);
+  }
+ 
+  loadProducts();
 </script>
 </body>
 </html>
