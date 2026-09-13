@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="page-fade">
-
+ 
 <header class="site-header">
   <a href="index.html" class="logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -23,7 +23,7 @@
     <button class="menu-btn" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </header>
-
+ 
 <div class="drawer-overlay"></div>
 <nav class="drawer">
   <button class="drawer-close" aria-label="Close menu">✕</button>
@@ -42,17 +42,17 @@
     WhatsApp 551 312-8280
   </div>
 </nav>
-
+ 
 <div class="section-head" style="padding-bottom:0;">
   <div>
     <div class="meta"><span>SECURE</span></div>
     <h2>CHECKOUT</h2>
   </div>
 </div>
-
+ 
 <div class="checkout-wrap">
   <div id="order-summary"></div>
-
+ 
   <form id="checkout-form" style="margin-top:26px;">
     <div class="form-row">
       <div class="form-group">
@@ -90,7 +90,7 @@
       <label for="zip">ZIP code</label>
       <input id="zip" required />
     </div>
-
+ 
     <button type="submit" class="btn btn-primary btn-full" id="pay-btn">Pay now</button>
     <p class="small-note">
       Card payment via Stripe is being connected. For now, submitting sends your order
@@ -98,12 +98,12 @@
     </p>
   </form>
 </div>
-
+ 
 <script src="js/cart.js"></script>
 <script src="js/main.js"></script>
 <script>
   const STORE_WHATSAPP = "15513128280"; // sin espacios ni +, formato internacional
-
+ 
   function renderSummary() {
     const cart = getCart();
     const box = document.getElementById("order-summary");
@@ -112,16 +112,16 @@
       document.getElementById("checkout-form").style.display = "none";
       return;
     }
-    let html = cart.map(i => `<div class="order-line"><span>${i.qty} × ${i.name}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div>`).join("");
+    let html = cart.map(i => `<div class="order-line"><span>${i.qty} × ${i.name}${i.size ? " (Size " + i.size + ")" : ""}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div>`).join("");
     html += `<div class="order-line" style="color:var(--text);font-weight:700;border-top:1px solid var(--line);margin-top:8px;padding-top:12px;"><span>Total</span><span>$${cartTotal().toFixed(2)} USD</span></div>`;
     box.innerHTML = html;
   }
-
+ 
   document.getElementById("checkout-form").addEventListener("submit", (e) => {
     e.preventDefault();
     const cart = getCart();
     if (cart.length === 0) return;
-
+ 
     const data = {
       fname: document.getElementById("fname").value,
       lname: document.getElementById("lname").value,
@@ -132,18 +132,18 @@
       state: document.getElementById("state").value,
       zip: document.getElementById("zip").value,
     };
-
-    const itemsText = cart.map(i => `- ${i.qty}x ${i.name} ($${i.price} each)`).join("%0A");
+ 
+    const itemsText = cart.map(i => `- ${i.qty}x ${i.name} | Size: ${i.size || "—"} ($${i.price} each)`).join("\n");
     const message =
-      `New order from SYNKD site%0A%0A` +
-      `Customer: ${data.fname} ${data.lname}%0A` +
-      `Email: ${data.email}%0A` +
-      `Phone: ${data.phone}%0A` +
-      `Shipping to: ${data.address}, ${data.city}, ${data.state} ${data.zip}%0A%0A` +
-      `Items:%0A${itemsText}%0A%0A` +
+      `New order from SYNKD site\n\n` +
+      `Customer: ${data.fname} ${data.lname}\n` +
+      `Email: ${data.email}\n` +
+      `Phone: ${data.phone}\n` +
+      `Shipping to: ${data.address}, ${data.city}, ${data.state} ${data.zip}\n\n` +
+      `Items:\n${itemsText}\n\n` +
       `Total: $${cartTotal().toFixed(2)} USD`;
-
-    window.open(`https://wa.me/${STORE_WHATSAPP}?text=${message}`, "_blank");
+ 
+    window.open(`https://wa.me/${STORE_WHATSAPP}?text=${encodeURIComponent(message)}`, "_blank");
     clearCart();
     document.querySelector(".checkout-wrap").innerHTML = `
       <div class="empty-state">
@@ -153,7 +153,7 @@
         <a href="index.html" class="btn btn-primary">Back to home</a>
       </div>`;
   });
-
+ 
   renderSummary();
 </script>
 </body>
