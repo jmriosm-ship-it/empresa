@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="page-fade">
-
+ 
 <header class="site-header">
   <a href="index.html" class="logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -23,7 +23,7 @@
     <button class="menu-btn" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </header>
-
+ 
 <div class="drawer-overlay"></div>
 <nav class="drawer">
   <button class="drawer-close" aria-label="Close menu">✕</button>
@@ -42,16 +42,16 @@
     WhatsApp 551 312-8280
   </div>
 </nav>
-
+ 
 <div class="section-head" style="padding-bottom:0;">
   <div>
     <div class="meta"><span>YOUR</span></div>
     <h2>CART</h2>
   </div>
 </div>
-
+ 
 <div class="cart-wrap" id="cart-wrap"></div>
-
+ 
 <script src="js/products.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/main.js"></script>
@@ -59,7 +59,7 @@
   function renderCart() {
     const wrap = document.getElementById("cart-wrap");
     const cart = getCart();
-
+ 
     if (cart.length === 0) {
       wrap.innerHTML = `
         <div class="empty-state">
@@ -70,28 +70,29 @@
         </div>`;
       return;
     }
-
+ 
     let itemsHtml = "";
     cart.forEach(item => {
+      const sizeAttr = item.size || "";
       itemsHtml += `
         <div class="cart-item">
           <div class="cart-thumb">${item.image ? `<img src="${item.image}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">` : ""}</div>
           <div class="cart-item-info">
             <h4>${item.name}</h4>
-            <span>$${item.price} USD</span>
+            <span>${item.size ? `Size: ${item.size} · ` : ""}$${item.price} USD</span>
             <div class="qty-control" style="margin-top:8px;">
-              <button data-action="dec" data-id="${item.id}">−</button>
+              <button data-action="dec" data-id="${item.id}" data-size="${sizeAttr}">−</button>
               <span>${item.qty}</span>
-              <button data-action="inc" data-id="${item.id}">+</button>
+              <button data-action="inc" data-id="${item.id}" data-size="${sizeAttr}">+</button>
             </div>
-            <a class="remove-btn" data-action="remove" data-id="${item.id}">Remove</a>
+            <a class="remove-btn" data-action="remove" data-id="${item.id}" data-size="${sizeAttr}">Remove</a>
           </div>
           <div style="font-weight:700;">$${(item.price * item.qty).toFixed(2)}</div>
         </div>`;
     });
-
+ 
     const total = cartTotal();
-
+ 
     wrap.innerHTML = `
       ${itemsHtml}
       <div class="cart-summary">
@@ -101,19 +102,21 @@
         <a href="checkout.html" class="btn btn-primary btn-full" style="margin-top:16px;">Checkout</a>
         <a href="shop.html" class="btn btn-outline btn-full">Continue shopping</a>
       </div>`;
-
+ 
     wrap.querySelectorAll("[data-action]").forEach(btn => {
       btn.addEventListener("click", () => {
         const id = btn.dataset.id;
-        const item = getCart().find(i => i.id === id);
-        if (btn.dataset.action === "inc") updateQty(id, item.qty + 1);
-        if (btn.dataset.action === "dec") updateQty(id, item.qty - 1);
-        if (btn.dataset.action === "remove") removeFromCart(id);
+        const size = btn.dataset.size || null;
+        const item = getCart().find(i => i.id === id && (i.size || null) === size);
+        if (!item) return;
+        if (btn.dataset.action === "inc") updateQty(id, size, item.qty + 1);
+        if (btn.dataset.action === "dec") updateQty(id, size, item.qty - 1);
+        if (btn.dataset.action === "remove") removeFromCart(id, size);
         renderCart();
       });
     });
   }
-
+ 
   renderCart();
 </script>
 </body>
