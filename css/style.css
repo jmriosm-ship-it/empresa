@@ -48,7 +48,7 @@ body::before{
   background-position:center 20%;
   background-size:70% auto;
   filter:blur(14px);
-  opacity:0.08;
+  opacity:0.18;
   z-index:-1;
   pointer-events:none;
   transform:translate(var(--cursor-x, 0px), var(--cursor-y, 0px));
