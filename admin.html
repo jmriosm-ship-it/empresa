@@ -1,3 +1,5 @@
+
+Admin · HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,16 +17,22 @@
   .admin-box h3{ font-family:var(--font-display); font-size:22px; margin-bottom:16px; text-transform:uppercase; }
   .admin-field{ margin-bottom:14px; }
   .admin-field label{ display:block; font-size:12px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
-  .admin-field input, .admin-field select{
+  .admin-field input, .admin-field select, .admin-field textarea{
     width:100%; background:var(--bg); border:1px solid var(--line); border-radius:10px;
     padding:11px 14px; color:var(--text); font-family:var(--font-body); font-size:14px;
   }
+  .admin-field .hint{ font-size:12px; color:var(--text-dim); margin-top:6px; }
   .admin-checks{ display:flex; gap:10px; flex-wrap:wrap; }
   .admin-checks label{
     display:flex; align-items:center; gap:6px; background:var(--bg);
     border:1px solid var(--line); border-radius:var(--radius-pill);
     padding:8px 14px; font-size:13px; cursor:pointer;
   }
+  .photo-slot{
+    border:1px dashed var(--line); border-radius:12px; padding:14px;
+    margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  }
+  .photo-slot .slot-label{ grid-column:1/-1; font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px; }
   .btn-primary{
     background:var(--accent); color:#fff; border:none; border-radius:var(--radius-pill);
     padding:13px 26px; font-size:14px; font-weight:700; text-transform:uppercase;
@@ -51,10 +59,9 @@
   .admin-msg.err{ color:#c0533e; }
   #adminPanel{ display:none; }
 </style>
-
 </head>
 <body class="page-fade">
-
+ 
 <header class="site-header">
   <a href="index.html" class="logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -63,9 +70,9 @@
     SYNKD
   </a>
 </header>
-
+ 
 <div class="admin-wrap">
-
+ 
   <!-- LOGIN -->
   <div class="admin-box" id="loginBox">
     <h3>Admin Login</h3>
@@ -80,15 +87,15 @@
     <button class="btn-primary" id="loginBtn">Log In</button>
     <p class="admin-msg" id="loginMsg"></p>
   </div>
-
+ 
   <!-- ADMIN PANEL (hidden until logged in) -->
   <div id="adminPanel">
-
+ 
     <div class="admin-box" style="display:flex; justify-content:space-between; align-items:center;">
       <span style="font-size:14px; color:var(--text-dim);">Logged in as <span id="loggedEmail"></span></span>
       <button class="btn-danger" id="logoutBtn">Log out</button>
     </div>
-
+ 
     <div class="admin-box">
       <h3>Add product</h3>
       <div class="admin-field">
@@ -98,6 +105,10 @@
       <div class="admin-field">
         <label>Price (USD)</label>
         <input type="number" id="pPrice" placeholder="55">
+      </div>
+      <div class="admin-field">
+        <label>Description</label>
+        <textarea id="pDescription" rows="4" placeholder="Tell customers about this piece — fabric, fit, details..."></textarea>
       </div>
       <div class="admin-field">
         <label>Category</label>
@@ -117,32 +128,57 @@
           <label><input type="checkbox" value="XXL" checked> XXL</label>
         </div>
       </div>
+ 
       <div class="admin-field">
-        <label>Photo</label>
-        <input type="file" id="pImage" accept="image/*">
+        <label>Photos (up to 4) — each can have its own color</label>
+        <p class="hint" style="margin-top:0; margin-bottom:10px;">
+          Photo 1 is required and shows first. If you write a color name for a photo (e.g. "Black", "White"),
+          customers can click that color to switch to that exact photo. Leave the color blank for a plain extra photo (like a back view) that isn't tied to a color.
+        </p>
+        <div class="photo-slot">
+          <span class="slot-label">Photo 1 (required)</span>
+          <input type="file" id="photo1" accept="image/*">
+          <input type="text" id="color1" placeholder="Color (optional), e.g. Black">
+        </div>
+        <div class="photo-slot">
+          <span class="slot-label">Photo 2 (optional)</span>
+          <input type="file" id="photo2" accept="image/*">
+          <input type="text" id="color2" placeholder="Color (optional), e.g. White">
+        </div>
+        <div class="photo-slot">
+          <span class="slot-label">Photo 3 (optional)</span>
+          <input type="file" id="photo3" accept="image/*">
+          <input type="text" id="color3" placeholder="Color (optional)">
+        </div>
+        <div class="photo-slot">
+          <span class="slot-label">Photo 4 (optional)</span>
+          <input type="file" id="photo4" accept="image/*">
+          <input type="text" id="color4" placeholder="Color (optional)">
+        </div>
       </div>
+ 
       <button class="btn-primary" id="addProductBtn">Add product</button>
       <p class="admin-msg" id="addMsg"></p>
     </div>
-
+ 
     <div class="admin-box">
       <h3>Current products</h3>
       <div id="productList">Loading…</div>
     </div>
-
+ 
   </div>
 </div>
-
+ 
 <script>
   // ⚠️ La "publishable key" es segura de tener aquí visible, no es una contraseña.
   const SUPABASE_URL = "https://zqjsvrrsbtovdilflkbp.supabase.co";
   const SUPABASE_KEY = "sb_publishable_2GuIxS-f8B4czOyCxc-KdQ_J-X7AxYY";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+ 
   const loginBox = document.getElementById("loginBox");
   const adminPanel = document.getElementById("adminPanel");
   const loginMsg = document.getElementById("loginMsg");
-
+ 
   async function checkSession() {
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
@@ -155,7 +191,7 @@
       adminPanel.style.display = "none";
     }
   }
-
+ 
   document.getElementById("loginBtn").addEventListener("click", async () => {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
@@ -169,12 +205,12 @@
       checkSession();
     }
   });
-
+ 
   document.getElementById("logoutBtn").addEventListener("click", async () => {
     await sb.auth.signOut();
     checkSession();
   });
-
+ 
   async function loadProducts() {
     const listEl = document.getElementById("productList");
     const { data, error } = await sb.from("products").select("*").order("created_at", { ascending: false });
@@ -186,17 +222,21 @@
       listEl.innerHTML = `<p style="color:var(--text-dim); font-size:14px;">No products yet.</p>`;
       return;
     }
-    listEl.innerHTML = data.map(p => `
+    listEl.innerHTML = data.map(p => {
+      const photos = p.photos || [];
+      const thumb = photos[0] ? photos[0].url : p.image_url;
+      const colorNames = photos.map(ph => ph.color).filter(Boolean);
+      return `
       <div class="admin-product-row">
-        <img class="admin-thumb" src="${p.image_url || ''}" onerror="this.style.background='var(--frame)'">
+        <img class="admin-thumb" src="${thumb || ''}" onerror="this.style.background='var(--frame)'">
         <div class="admin-product-info">
           <h4>${p.name}</h4>
-          <span>$${p.price} USD · ${p.category} · ${(p.sizes || []).join(", ")}</span>
+          <span>$${p.price} USD · ${p.category} · ${(p.sizes || []).join(", ")}${colorNames.length ? " · Colors: " + colorNames.join(", ") : ""} · ${photos.length} photo${photos.length===1?"":"s"}</span>
         </div>
-        <button class="btn-danger" data-delete="${p.id}" data-image="${p.image_url || ''}">Delete</button>
+        <button class="btn-danger" data-delete="${p.id}">Delete</button>
       </div>
-    `).join("");
-
+    `}).join("");
+ 
     listEl.querySelectorAll("[data-delete]").forEach(btn => {
       btn.addEventListener("click", async () => {
         if (!confirm("Delete this product?")) return;
@@ -206,71 +246,78 @@
       });
     });
   }
-
+ 
+  async function uploadImage(file) {
+    const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+    const { error } = await sb.storage.from("product-images").upload(filePath, file);
+    if (error) throw error;
+    const { data } = sb.storage.from("product-images").getPublicUrl(filePath);
+    return data.publicUrl;
+  }
+ 
   document.getElementById("addProductBtn").addEventListener("click", async () => {
     const addMsg = document.getElementById("addMsg");
     const name = document.getElementById("pName").value.trim();
     const price = parseFloat(document.getElementById("pPrice").value);
+    const description = document.getElementById("pDescription").value.trim();
     const category = document.getElementById("pCategory").value;
     const sizes = Array.from(document.querySelectorAll(".admin-checks input:checked")).map(cb => cb.value);
-    const file = document.getElementById("pImage").files[0];
-
+ 
+    const slots = [1, 2, 3, 4].map(n => ({
+      file: document.getElementById(`photo${n}`).files[0] || null,
+      color: document.getElementById(`color${n}`).value.trim(),
+    })).filter(s => s.file);
+ 
     if (!name || !price || sizes.length === 0) {
       addMsg.textContent = "Please fill in name, price, and at least one size.";
       addMsg.className = "admin-msg err";
       return;
     }
-
-    addMsg.textContent = "Saving…";
-    addMsg.className = "admin-msg";
-
-    let imageUrl = "";
-    if (file) {
-      const filePath = `${Date.now()}-${file.name}`;
-      const { error: uploadError } = await sb.storage.from("product-images").upload(filePath, file);
-      if (uploadError) {
-        addMsg.textContent = "Image upload failed: " + uploadError.message;
-        addMsg.className = "admin-msg err";
-        return;
-      }
-      const { data: publicUrlData } = sb.storage.from("product-images").getPublicUrl(filePath);
-      imageUrl = publicUrlData.publicUrl;
-    }
-
-    const { error: insertError } = await sb.from("products").insert({
-      name, price, category, sizes, image_url: imageUrl
-    });
-
-    if (insertError) {
-      addMsg.textContent = insertError.message;
+    if (slots.length === 0) {
+      addMsg.textContent = "Please add at least Photo 1.";
       addMsg.className = "admin-msg err";
       return;
     }
-
-    addMsg.textContent = "Product added!";
-    addMsg.className = "admin-msg ok";
-    document.getElementById("pName").value = "";
-    document.getElementById("pPrice").value = "";
-    document.getElementById("pImage").value = "";
-    loadProducts();
+ 
+    addMsg.textContent = "Uploading photos…";
+    addMsg.className = "admin-msg";
+ 
+    try {
+      const photos = [];
+      for (const slot of slots) {
+        const url = await uploadImage(slot.file);
+        photos.push({ url, color: slot.color || "" });
+      }
+ 
+      addMsg.textContent = "Saving product…";
+ 
+      const { error: insertError } = await sb.from("products").insert({
+        name, price, description, category, sizes,
+        photos,
+        image_url: photos[0].url, // se mantiene por compatibilidad con el catálogo
+      });
+ 
+      if (insertError) throw insertError;
+ 
+      addMsg.textContent = "Product added!";
+      addMsg.className = "admin-msg ok";
+      document.getElementById("pName").value = "";
+      document.getElementById("pPrice").value = "";
+      document.getElementById("pDescription").value = "";
+      [1, 2, 3, 4].forEach(n => {
+        document.getElementById(`photo${n}`).value = "";
+        document.getElementById(`color${n}`).value = "";
+      });
+      loadProducts();
+    } catch (err) {
+      addMsg.textContent = err.message || "Something went wrong.";
+      addMsg.className = "admin-msg err";
+    }
   });
-
+ 
   checkSession();
 </script>
-
-<div class="checkout-wrap">
-  <div class="section-head" style="padding:0 0 20px;">
-    <h2 style="font-size:34px;">ADMIN</h2>
-  </div>
-  <p style="color:var(--text-dim); line-height:1.6;">
-    Este panel todavía no está conectado. En el próximo paso lo conectamos a Firebase
-    para que aquí tu amigo pueda iniciar sesión con una contraseña y agregar,
-    editar o quitar productos (nombre, precio, talla, foto) sin tocar código —
-    los cambios se van a reflejar automáticamente en la tienda.
-  </p>
-  <a href="index.html" class="btn btn-outline" style="margin-top:20px;">Volver al inicio</a>
-</div>
-
-
+ 
 </body>
 </html>
+ 

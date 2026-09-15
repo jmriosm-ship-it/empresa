@@ -196,31 +196,34 @@
     }
  
     currentProduct = product;
-    galleryImages = [product.image_url, ...(product.extra_images || [])].filter(Boolean);
+    const photos = (product.photos && product.photos.length)
+      ? product.photos
+      : (product.image_url ? [{ url: product.image_url, color: "" }, ...((product.extra_images || []).map(u => ({ url: u, color: "" })))] : []);
+    galleryImages = photos.map(p => p.url);
+    const colorSet = [...new Set(photos.map(p => p.color).filter(Boolean))];
     const sizes = (product.sizes && product.sizes.length) ? product.sizes : ["S", "M", "L", "XL", "XXL"];
-    const colors = product.colors || [];
     selectedSize = sizes[0];
-    selectedColor = colors[0] || null;
+    selectedColor = colorSet[0] || null;
  
     root.innerHTML = `
       <div class="product-wrap">
         <div>
           <div class="pg-main" id="pgMain">
-            ${galleryImages[0] ? `<img src="${galleryImages[0]}" alt="${product.name}">` : `<span class="placeholder">PHOTO COMING SOON</span>`}
+            ${photos[0] ? `<img src="${photos[0].url}" alt="${product.name}">` : `<span class="placeholder">PHOTO COMING SOON</span>`}
           </div>
-          ${galleryImages.length > 1 ? `<div class="pg-thumbs" id="pgThumbs">${galleryImages.map((img, i) => `
-            <div class="pg-thumb ${i === 0 ? "active" : ""}" data-src="${img}"><img src="${img}"></div>
+          ${photos.length > 1 ? `<div class="pg-thumbs" id="pgThumbs">${photos.map((p, i) => `
+            <div class="pg-thumb ${i === 0 ? "active" : ""}" data-src="${p.url}" data-color="${p.color || ""}"><img src="${p.url}"></div>
           `).join("")}</div>` : ""}
         </div>
         <div>
           <h1 class="pi-name">${product.name}</h1>
           <div class="pi-price">$${product.price} USD</div>
  
-          ${colors.length ? `
+          ${colorSet.length ? `
           <div class="pi-section">
-            <span class="pi-label">Color: <span id="colorLabel">${colors[0]}</span></span>
+            <span class="pi-label">Color: <span id="colorLabel">${colorSet[0]}</span></span>
             <div class="pi-colors" id="colorPicker">
-              ${colors.map((c, i) => `<div class="pi-color ${i === 0 ? "active" : ""}" style="background:${c}" data-color="${c}" title="${c}"></div>`).join("")}
+              ${colorSet.map((c, i) => `<div class="pi-color ${i === 0 ? "active" : ""}" style="background:${c}" data-color="${c}" title="${c}"></div>`).join("")}
             </div>
           </div>` : ""}
  
@@ -262,10 +265,19 @@
         document.querySelectorAll(".pg-thumb").forEach(t => t.classList.remove("active"));
         thumb.classList.add("active");
         document.getElementById("pgMain").innerHTML = `<img src="${thumb.dataset.src}" alt="${product.name}">`;
+ 
+        if (thumb.dataset.color) {
+          selectedColor = thumb.dataset.color;
+          document.querySelectorAll(".pi-color").forEach(c => {
+            c.classList.toggle("active", c.dataset.color === selectedColor);
+          });
+          const label = document.getElementById("colorLabel");
+          if (label) label.textContent = selectedColor;
+        }
       });
     });
  
-    // Color picker
+    // Color picker — switches the main photo to that color's photo
     document.querySelectorAll(".pi-color").forEach(el => {
       el.addEventListener("click", () => {
         document.querySelectorAll(".pi-color").forEach(c => c.classList.remove("active"));
@@ -273,6 +285,14 @@
         selectedColor = el.dataset.color;
         const label = document.getElementById("colorLabel");
         if (label) label.textContent = selectedColor;
+ 
+        const matchingPhoto = photos.find(p => p.color === selectedColor);
+        if (matchingPhoto) {
+          document.getElementById("pgMain").innerHTML = `<img src="${matchingPhoto.url}" alt="${product.name}">`;
+          document.querySelectorAll(".pg-thumb").forEach(t => {
+            t.classList.toggle("active", t.dataset.src === matchingPhoto.url);
+          });
+        }
       });
     });
  
@@ -412,4 +432,3 @@
 </script>
 </body>
 </html>
- 
