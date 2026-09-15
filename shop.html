@@ -57,6 +57,10 @@
   <button class="tab" data-cat="alo">Alo</button>
 </div>
  
+<div class="search-wrap">
+  <input type="text" id="searchInput" class="search-input" placeholder="Search products...">
+</div>
+ 
 <div class="grid" id="product-grid"></div>
  
 <footer class="footer-panel">
@@ -77,21 +81,38 @@
   const grid = document.getElementById("product-grid");
   const tabs = document.querySelectorAll(".tab");
   const titleEl = document.getElementById("shop-title");
+  const searchInput = document.getElementById("searchInput");
+  let currentCat = "all";
+  let currentSearch = "";
  
-  function renderProducts(category) {
-    const items = category === "all" ? PRODUCTS : PRODUCTS.filter(p => p.category === category);
+  function showSkeleton() {
+    grid.innerHTML = Array.from({ length: 6 }).map(() => `
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-media"></div>
+        <div class="skeleton skeleton-line"></div>
+        <div class="skeleton skeleton-line short"></div>
+      </div>
+    `).join("");
+  }
+ 
+  function renderProducts() {
+    let items = currentCat === "all" ? PRODUCTS : PRODUCTS.filter(p => p.category === currentCat);
+    if (currentSearch.trim()) {
+      const q = currentSearch.trim().toLowerCase();
+      items = items.filter(p => p.name.toLowerCase().includes(q));
+    }
     grid.innerHTML = "";
  
     if (items.length === 0) {
-      grid.innerHTML = `<p style="padding:60px 24px; color:var(--text-dim); grid-column:1/-1; text-align:center;">No products here yet — check back soon.</p>`;
+      grid.innerHTML = `<p style="padding:60px 24px; color:var(--text-dim); grid-column:1/-1; text-align:center;">No products found — try a different search or category.</p>`;
       return;
     }
  
     items.forEach((p, i) => {
       const card = document.createElement("a");
       card.href = `product.html?id=${p.id}`;
-      card.className = "card";
-      card.style.animationDelay = (i * 0.04) + "s";
+      card.className = "card reveal";
+      card.style.transitionDelay = (i * 0.05) + "s";
       card.innerHTML = `
         <div class="card-media">
           ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span class="placeholder">PHOTO COMING SOON</span>`}
@@ -102,6 +123,8 @@
         </div>`;
       grid.appendChild(card);
     });
+ 
+    observeReveals(grid);
   }
  
   function setActiveTab(cat) {
@@ -111,15 +134,20 @@
  
   tabs.forEach(tab => {
     tab.addEventListener("click", () => {
-      const cat = tab.dataset.cat;
-      history.replaceState(null, "", cat === "all" ? "shop.html" : `shop.html?cat=${cat}`);
-      setActiveTab(cat);
-      renderProducts(cat);
+      currentCat = tab.dataset.cat;
+      history.replaceState(null, "", currentCat === "all" ? "shop.html" : `shop.html?cat=${currentCat}`);
+      setActiveTab(currentCat);
+      renderProducts();
     });
   });
  
+  searchInput.addEventListener("input", () => {
+    currentSearch = searchInput.value;
+    renderProducts();
+  });
+ 
   async function loadProducts() {
-    grid.innerHTML = `<p style="padding:60px 24px; color:var(--text-dim); grid-column:1/-1; text-align:center;">Loading products…</p>`;
+    showSkeleton();
  
     const { data, error } = await sb.from("products").select("*").order("created_at", { ascending: false });
  
@@ -138,14 +166,13 @@
     }));
  
     const params = new URLSearchParams(window.location.search);
-    const initialCat = params.get("cat") && CATEGORY_LABELS[params.get("cat")] ? params.get("cat") : "all";
-    setActiveTab(initialCat);
-    renderProducts(initialCat);
+    currentCat = params.get("cat") && CATEGORY_LABELS[params.get("cat")] ? params.get("cat") : "all";
+    setActiveTab(currentCat);
+    renderProducts();
   }
  
   loadProducts();
 </script>
 </body>
 </html>
- 
  

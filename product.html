@@ -11,7 +11,7 @@
     display:grid; grid-template-columns:1fr 1fr; gap:48px;
   }
   @media (max-width:800px){ .product-wrap{ grid-template-columns:1fr; gap:28px; padding:24px 20px 60px; } }
- 
+
   /* Gallery */
   .pg-main{
     aspect-ratio:1/1; border-radius:var(--radius-lg); overflow:hidden;
@@ -29,21 +29,21 @@
   }
   .pg-thumb.active{ border-color:var(--accent); }
   .pg-thumb img{ width:100%; height:100%; object-fit:cover; }
- 
+
   /* Info */
   .pi-name{ font-family:var(--font-display); font-size:clamp(28px,4vw,42px); text-transform:uppercase; line-height:1.02; margin-bottom:10px; }
   .pi-price{ font-size:22px; font-weight:700; color:var(--text); margin-bottom:18px; }
   .pi-desc{ font-size:14px; line-height:1.7; color:var(--text-dim); margin-bottom:26px; }
- 
+
   .product-details-wrap{
     max-width:1100px; margin:0 auto; padding:0 24px 50px;
     animation:fadeUp .5s var(--ease) both;
   }
   .pd-title{ font-family:var(--font-display); font-size:22px; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.5px; }
- 
+
   @keyframes fadeUp{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
   @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
- 
+
   .product-wrap > div:first-child{ animation:fadeUp .5s var(--ease) both; }
   .product-wrap > div:last-child{ animation:fadeUp .5s var(--ease) .08s both; }
   .pg-main img{ animation:fadeIn .3s ease both; }
@@ -51,10 +51,10 @@
   .pg-thumb:hover{ transform:translateY(-3px); }
   .pi-color:hover{ transform:scale(1.12); }
   .pi-size-btn:hover{ transform:translateY(-2px); }
- 
+
   .pi-label{ font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); margin-bottom:10px; display:block; }
   .pi-section{ margin-bottom:24px; }
- 
+
   .pi-colors{ display:flex; gap:10px; flex-wrap:wrap; }
   .pi-color{
     width:34px; height:34px; border-radius:50%; cursor:pointer;
@@ -63,7 +63,7 @@
   }
   .pi-color.active{ border-color:var(--accent); transform:scale(1.12); }
   .pi-color-label{ font-size:13px; color:var(--text-dim); margin-top:8px; }
- 
+
   .pi-sizes{ display:flex; gap:10px; flex-wrap:wrap; }
   .pi-size-btn{
     min-width:52px; padding:10px 14px; border-radius:12px; text-align:center;
@@ -71,16 +71,38 @@
     font-size:14px; font-weight:600; cursor:pointer; transition:all .18s var(--ease);
   }
   .pi-size-btn.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
- 
+
   .pi-qty{ display:flex; align-items:center; gap:16px; }
   .pi-qty button{
     width:38px; height:38px; border-radius:50%; background:var(--surface);
     border:1px solid var(--line); color:var(--text); font-size:18px;
   }
   .pi-qty span{ font-size:16px; font-weight:700; min-width:20px; text-align:center; }
- 
-  .pi-add-msg{ font-size:13px; margin-top:12px; color:#7a8c5c; }
- 
+
+  .pi-add-msg{ font-size:13px; margin-top:12px; color:#7a8c5c; min-height:0; }
+
+  /* Zoom + lightbox */
+  .pg-main{ cursor:zoom-in; }
+  .pg-main img{ transition:transform .4s var(--ease); }
+  .pg-main:hover img{ transform:scale(1.08); }
+
+  .lightbox-overlay{
+    position:fixed; inset:0; background:rgba(10,10,10,0.92); z-index:300;
+    display:none; align-items:center; justify-content:center; padding:24px;
+    animation:fadeIn .25s ease;
+  }
+  .lightbox-overlay.show{ display:flex; }
+  .lightbox-overlay img{ max-width:90vw; max-height:88vh; border-radius:12px; cursor:zoom-out; }
+  .lightbox-close{
+    position:absolute; top:24px; right:28px; background:none; border:none;
+    color:#fff; font-size:32px; cursor:pointer; line-height:1;
+  }
+
+  /* Related products */
+  .related-wrap{ max-width:1100px; margin:0 auto; padding:0 24px 90px; }
+  .related-title{ font-family:var(--font-display); font-size:26px; text-transform:uppercase; margin-bottom:20px; letter-spacing:0.5px; }
+  .related-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:18px; }
+
   /* Reviews */
   .reviews-wrap{ max-width:1100px; margin:0 auto; padding:0 24px 100px; }
   .reviews-head{ display:flex; gap:40px; flex-wrap:wrap; align-items:flex-start; margin-bottom:34px; }
@@ -92,7 +114,7 @@
   .rbar-row{ display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-dim); margin-bottom:6px; }
   .rbar-track{ flex:1; height:8px; border-radius:99px; background:var(--surface); overflow:hidden; }
   .rbar-fill{ height:100%; background:#e8b13c; }
- 
+
   .review-item{ padding:20px 0; border-top:1px solid var(--line); }
   .review-item .stars{ color:#e8b13c; font-size:14px; margin-bottom:6px; }
   .review-item .who{ font-weight:700; font-size:14px; margin-bottom:4px; }
@@ -102,7 +124,7 @@
     background:none; border:1px solid #c0533e; color:#c0533e; border-radius:99px;
     padding:5px 14px; font-size:11px; text-transform:uppercase; cursor:pointer; margin-top:10px;
   }
- 
+
   .review-form{
     background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md);
     padding:26px; margin-top:30px;
@@ -118,7 +140,7 @@
 </style>
 </head>
 <body class="page-fade">
- 
+
 <header class="site-header">
   <a href="index.html" class="logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -134,7 +156,7 @@
     <button class="menu-btn" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </header>
- 
+
 <div class="drawer-overlay"></div>
 <nav class="drawer">
   <button class="drawer-close" aria-label="Close menu">✕</button>
@@ -153,16 +175,35 @@
     WhatsApp 551 312-8280
   </div>
 </nav>
- 
+
 <div id="product-root">
-  <p style="padding:60px 24px; text-align:center; color:var(--text-dim);">Loading product…</p>
+  <div class="product-wrap">
+    <div>
+      <div class="skeleton" style="aspect-ratio:1/1; border-radius:var(--radius-lg); margin-bottom:14px;"></div>
+      <div style="display:flex; gap:10px;">
+        <div class="skeleton" style="width:74px; height:74px; border-radius:12px;"></div>
+        <div class="skeleton" style="width:74px; height:74px; border-radius:12px;"></div>
+      </div>
+    </div>
+    <div>
+      <div class="skeleton" style="height:38px; width:70%; margin-bottom:14px;"></div>
+      <div class="skeleton" style="height:24px; width:30%; margin-bottom:24px;"></div>
+      <div class="skeleton" style="height:44px; width:100%; margin-bottom:14px;"></div>
+      <div class="skeleton" style="height:44px; width:100%;"></div>
+    </div>
+  </div>
 </div>
- 
+
+<div class="lightbox-overlay" id="lightboxOverlay">
+  <button class="lightbox-close" id="lightboxClose">&times;</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
 <footer class="footer-panel">
   <div class="handle">@SYNKD.<br/>STREETWEAR</div>
   <p>You are just one step away from holding the product you've always dreamed of in your hands.</p>
 </footer>
- 
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/cart.js"></script>
 <script src="js/main.js"></script>
@@ -170,35 +211,35 @@
   const SUPABASE_URL = "https://zqjsvrrsbtovdilflkbp.supabase.co";
   const SUPABASE_KEY = "sb_publishable_2GuIxS-f8B4czOyCxc-KdQ_J-X7AxYY";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
- 
+
   const root = document.getElementById("product-root");
   const params = new URLSearchParams(window.location.search);
   const productId = params.get("id");
- 
+
   let currentProduct = null;
   let selectedColor = null;
   let selectedSize = null;
   let qty = 1;
   let galleryImages = [];
- 
+
   function starString(rating) {
     const full = Math.round(rating);
     return "★".repeat(full) + "☆".repeat(5 - full);
   }
- 
+
   async function loadProduct() {
     if (!productId) {
       root.innerHTML = `<p style="padding:60px 24px; text-align:center; color:var(--text-dim);">Product not found.</p>`;
       return;
     }
- 
+
     const { data: product, error } = await sb.from("products").select("*").eq("id", productId).single();
- 
+
     if (error || !product) {
       root.innerHTML = `<p style="padding:60px 24px; text-align:center; color:var(--text-dim);">Product not found.</p>`;
       return;
     }
- 
+
     currentProduct = product;
     const photos = (product.photos && product.photos.length)
       ? product.photos
@@ -208,7 +249,7 @@
     const sizes = (product.sizes && product.sizes.length) ? product.sizes : ["S", "M", "L", "XL", "XXL"];
     selectedSize = sizes[0];
     selectedColor = colorSet[0] || null;
- 
+
     root.innerHTML = `
       <div class="product-wrap">
         <div>
@@ -222,7 +263,7 @@
         <div>
           <h1 class="pi-name">${product.name}</h1>
           <div class="pi-price">$${product.price} USD</div>
- 
+
           ${colorSet.length ? `
           <div class="pi-section">
             <span class="pi-label">Color: <span id="colorLabel">${colorSet[0]}</span></span>
@@ -230,14 +271,14 @@
               ${colorSet.map((c, i) => `<div class="pi-color ${i === 0 ? "active" : ""}" style="background:${c}" data-color="${c}" title="${c}"></div>`).join("")}
             </div>
           </div>` : ""}
- 
+
           <div class="pi-section">
             <span class="pi-label">Size</span>
             <div class="pi-sizes" id="sizePicker">
               ${sizes.map((s, i) => `<div class="pi-size-btn ${i === 0 ? "active" : ""}" data-size="${s}">${s}</div>`).join("")}
             </div>
           </div>
- 
+
           <div class="pi-section">
             <span class="pi-label">Quantity</span>
             <div class="pi-qty">
@@ -246,30 +287,40 @@
               <button id="qtyPlus">+</button>
             </div>
           </div>
- 
+
           <button class="btn btn-primary btn-full" id="addToCartBtn">Add to cart</button>
           <p class="pi-add-msg" id="addMsg"></p>
         </div>
       </div>
- 
+
       ${product.description ? `
       <div class="product-details-wrap">
         <h3 class="pd-title">Product Details</h3>
         <p class="pi-desc">${product.description}</p>
       </div>` : ""}
- 
+
       <div class="reviews-wrap" id="reviewsWrap">
-        <p style="color:var(--text-dim);">Loading reviews…</p>
+        <div class="skeleton" style="height:80px; width:200px; margin-bottom:20px;"></div>
+        <div class="skeleton" style="height:14px; width:100%; margin-bottom:10px;"></div>
+        <div class="skeleton" style="height:14px; width:100%;"></div>
       </div>
     `;
- 
+
+    // Lightbox: click the main photo to view fullscreen
+    document.getElementById("pgMain").addEventListener("click", () => {
+      const img = document.querySelector("#pgMain img");
+      if (!img) return;
+      document.getElementById("lightboxImg").src = img.src;
+      document.getElementById("lightboxOverlay").classList.add("show");
+    });
+
     // Gallery thumb clicks
     document.querySelectorAll(".pg-thumb").forEach(thumb => {
       thumb.addEventListener("click", () => {
         document.querySelectorAll(".pg-thumb").forEach(t => t.classList.remove("active"));
         thumb.classList.add("active");
         document.getElementById("pgMain").innerHTML = `<img src="${thumb.dataset.src}" alt="${product.name}">`;
- 
+
         if (thumb.dataset.color) {
           selectedColor = thumb.dataset.color;
           document.querySelectorAll(".pi-color").forEach(c => {
@@ -280,7 +331,7 @@
         }
       });
     });
- 
+
     // Color picker — switches the main photo to that color's photo
     document.querySelectorAll(".pi-color").forEach(el => {
       el.addEventListener("click", () => {
@@ -289,7 +340,7 @@
         selectedColor = el.dataset.color;
         const label = document.getElementById("colorLabel");
         if (label) label.textContent = selectedColor;
- 
+
         const matchingPhoto = photos.find(p => p.color === selectedColor);
         if (matchingPhoto) {
           document.getElementById("pgMain").innerHTML = `<img src="${matchingPhoto.url}" alt="${product.name}">`;
@@ -299,7 +350,7 @@
         }
       });
     });
- 
+
     // Size picker
     document.querySelectorAll(".pi-size-btn").forEach(el => {
       el.addEventListener("click", () => {
@@ -308,7 +359,7 @@
         selectedSize = el.dataset.size;
       });
     });
- 
+
     // Quantity
     document.getElementById("qtyMinus").addEventListener("click", () => {
       qty = Math.max(1, qty - 1);
@@ -318,7 +369,7 @@
       qty = qty + 1;
       document.getElementById("qtyVal").textContent = qty;
     });
- 
+
     // Add to cart
     document.getElementById("addToCartBtn").addEventListener("click", () => {
       const productForCart = {
@@ -328,14 +379,45 @@
         image: product.image_url,
       };
       addToCart(productForCart, qty, selectedSize);
-      const msg = document.getElementById("addMsg");
-      msg.textContent = "Added to cart ✓";
-      setTimeout(() => { msg.textContent = ""; }, 2000);
+      showToast("Added to cart");
     });
- 
+
     loadReviews();
+    loadRelated(product.category, product.id);
   }
- 
+
+  async function loadRelated(category, excludeId) {
+    const { data, error } = await sb
+      .from("products")
+      .select("*")
+      .eq("category", category)
+      .neq("id", excludeId)
+      .limit(4);
+
+    if (error || !data || data.length === 0) return;
+
+    const wrap = document.createElement("div");
+    wrap.className = "related-wrap reveal";
+    wrap.innerHTML = `
+      <h3 class="related-title">You might also like</h3>
+      <div class="related-grid">
+        ${data.map(p => `
+          <a href="product.html?id=${p.id}" class="card">
+            <div class="card-media">
+              ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `<span class="placeholder">PHOTO COMING SOON</span>`}
+            </div>
+            <div class="card-body">
+              <h3>${p.name}</h3>
+              <p class="card-price">$${p.price} USD</p>
+            </div>
+          </a>
+        `).join("")}
+      </div>
+    `;
+    document.getElementById("reviewsWrap").insertAdjacentElement("beforebegin", wrap);
+    observeReveals(wrap);
+  }
+
   async function loadReviews() {
     const wrap = document.getElementById("reviewsWrap");
     const { data: reviews, error } = await sb
@@ -343,15 +425,15 @@
       .select("*")
       .eq("product_id", productId)
       .order("created_at", { ascending: false });
- 
+
     const { data: { session } } = await sb.auth.getSession();
     const isAdmin = !!session;
- 
+
     const list = error ? [] : reviews;
     const total = list.length;
     const avg = total ? list.reduce((s, r) => s + r.rating, 0) / total : 0;
     const counts = [5, 4, 3, 2, 1].map(star => list.filter(r => r.rating === star).length);
- 
+
     wrap.innerHTML = `
       <div class="reviews-head">
         <div class="reviews-score">
@@ -369,7 +451,7 @@
           `).join("")}
         </div>
       </div>
- 
+
       <div id="reviewList">
         ${total === 0
           ? `<p style="color:var(--text-dim); font-size:14px;">No reviews yet — be the first to leave one!</p>`
@@ -383,7 +465,7 @@
             </div>
           `).join("")}
       </div>
- 
+
       <div class="review-form">
         <h4>Leave a review</h4>
         <div class="star-picker" id="starPicker">
@@ -395,7 +477,7 @@
         <p class="pi-add-msg" id="reviewMsg"></p>
       </div>
     `;
- 
+
     wrap.querySelectorAll(".review-delete-btn").forEach(btn => {
       btn.addEventListener("click", async () => {
         if (!confirm("Delete this review?")) return;
@@ -403,7 +485,7 @@
         loadReviews();
       });
     });
- 
+
     let chosenStar = 0;
     const starEls = document.querySelectorAll("#starPicker span");
     starEls.forEach(el => {
@@ -412,39 +494,49 @@
         starEls.forEach(s => s.classList.toggle("active", parseInt(s.dataset.star) <= chosenStar));
       });
     });
- 
+
     document.getElementById("submitReviewBtn").addEventListener("click", async () => {
       const reviewMsg = document.getElementById("reviewMsg");
       const name = document.getElementById("reviewName").value.trim();
       const comment = document.getElementById("reviewComment").value.trim();
- 
+
       if (!name || chosenStar === 0) {
         reviewMsg.textContent = "Please add your name and pick a star rating.";
         reviewMsg.style.color = "#c0533e";
         return;
       }
- 
+
       reviewMsg.textContent = "Submitting…";
       reviewMsg.style.color = "var(--text-dim)";
- 
+
       const { error } = await sb.from("reviews").insert({
         product_id: productId,
         customer_name: name,
         rating: chosenStar,
         comment,
       });
- 
+
       if (error) {
         reviewMsg.textContent = error.message;
         reviewMsg.style.color = "#c0533e";
         return;
       }
- 
+
       loadReviews();
     });
   }
- 
+
   loadProduct();
+
+  // Lightbox close handlers
+  document.getElementById("lightboxClose").addEventListener("click", () => {
+    document.getElementById("lightboxOverlay").classList.remove("show");
+  });
+  document.getElementById("lightboxOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "lightboxOverlay" || e.target.id === "lightboxImg") {
+      document.getElementById("lightboxOverlay").classList.remove("show");
+    }
+  });
 </script>
 </body>
 </html>

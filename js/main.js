@@ -56,3 +56,44 @@ function initCursorBackground() {
 }
 document.addEventListener("DOMContentLoaded", initCursorBackground);
  
+/* Notificación flotante reutilizable (ej. "Added to cart") */
+function showToast(message) {
+  let container = document.getElementById("toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toast-container";
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+  container.appendChild(toast);
+ 
+  requestAnimationFrame(() => toast.classList.add("show"));
+ 
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, 2400);
+}
+ 
+/* Animación suave al hacer scroll — agrega la clase "reveal" a cualquier elemento
+   y esta función se encarga de mostrarlo cuando entra en pantalla.
+   Se puede llamar de nuevo después de insertar contenido dinámico (ej. tarjetas de producto). */
+function observeReveals(root = document) {
+  const els = root.querySelectorAll(".reveal:not(.revealed)");
+  if (!("IntersectionObserver" in window)) {
+    els.forEach(el => el.classList.add("revealed"));
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("revealed");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  els.forEach(el => observer.observe(el));
+}
+ 
