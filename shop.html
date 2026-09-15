@@ -3,115 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Product — SYNKD Streetwear</title>
+<title>Shop — SYNKD Streetwear</title>
 <link rel="stylesheet" href="css/style.css" />
-<style>
-  .product-wrap{
-    max-width:1100px; margin:0 auto; padding:40px 24px 80px;
-    display:grid; grid-template-columns:1fr 1fr; gap:48px;
-  }
-  @media (max-width:800px){ .product-wrap{ grid-template-columns:1fr; gap:28px; padding:24px 20px 60px; } }
- 
-  /* Gallery */
-  .pg-main{
-    aspect-ratio:1/1; border-radius:var(--radius-lg); overflow:hidden;
-    background:linear-gradient(150deg, var(--frame-2), var(--frame));
-    display:flex; align-items:center; justify-content:center;
-    margin-bottom:14px;
-  }
-  .pg-main img{ width:100%; height:100%; object-fit:cover; }
-  .pg-main .placeholder{ font-family:var(--font-display); color:rgba(255,255,255,0.45); font-size:14px; }
-  .pg-thumbs{ display:flex; gap:10px; flex-wrap:wrap; }
-  .pg-thumb{
-    width:74px; height:74px; border-radius:12px; overflow:hidden; cursor:pointer;
-    background:linear-gradient(150deg, var(--frame-2), var(--frame));
-    border:2px solid transparent; transition:border-color .2s var(--ease);
-  }
-  .pg-thumb.active{ border-color:var(--accent); }
-  .pg-thumb img{ width:100%; height:100%; object-fit:cover; }
- 
-  /* Info */
-  .pi-name{ font-family:var(--font-display); font-size:clamp(28px,4vw,42px); text-transform:uppercase; line-height:1.02; margin-bottom:10px; }
-  .pi-price{ font-size:22px; font-weight:700; color:var(--text); margin-bottom:18px; }
-  .pi-desc{ font-size:14px; line-height:1.7; color:var(--text-dim); margin-bottom:26px; }
- 
-  .product-details-wrap{
-    max-width:1100px; margin:0 auto; padding:0 24px 50px;
-    animation:fadeUp .5s var(--ease) both;
-  }
-  .pd-title{ font-family:var(--font-display); font-size:22px; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.5px; }
- 
-  @keyframes fadeUp{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
-  @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
- 
-  .product-wrap > div:first-child{ animation:fadeUp .5s var(--ease) both; }
-  .product-wrap > div:last-child{ animation:fadeUp .5s var(--ease) .08s both; }
-  .pg-main img{ animation:fadeIn .3s ease both; }
-  .pg-thumb{ transition:border-color .2s var(--ease), transform .2s var(--ease); }
-  .pg-thumb:hover{ transform:translateY(-3px); }
-  .pi-color:hover{ transform:scale(1.12); }
-  .pi-size-btn:hover{ transform:translateY(-2px); }
- 
-  .pi-label{ font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); margin-bottom:10px; display:block; }
-  .pi-section{ margin-bottom:24px; }
- 
-  .pi-colors{ display:flex; gap:10px; flex-wrap:wrap; }
-  .pi-color{
-    width:34px; height:34px; border-radius:50%; cursor:pointer;
-    border:2px solid transparent; box-shadow:0 0 0 1px var(--line);
-    transition:transform .18s var(--ease), border-color .18s var(--ease);
-  }
-  .pi-color.active{ border-color:var(--accent); transform:scale(1.12); }
-  .pi-color-label{ font-size:13px; color:var(--text-dim); margin-top:8px; }
- 
-  .pi-sizes{ display:flex; gap:10px; flex-wrap:wrap; }
-  .pi-size-btn{
-    min-width:52px; padding:10px 14px; border-radius:12px; text-align:center;
-    background:var(--surface); border:1px solid var(--line); color:var(--text);
-    font-size:14px; font-weight:600; cursor:pointer; transition:all .18s var(--ease);
-  }
-  .pi-size-btn.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
- 
-  .pi-qty{ display:flex; align-items:center; gap:16px; }
-  .pi-qty button{
-    width:38px; height:38px; border-radius:50%; background:var(--surface);
-    border:1px solid var(--line); color:var(--text); font-size:18px;
-  }
-  .pi-qty span{ font-size:16px; font-weight:700; min-width:20px; text-align:center; }
- 
-  .pi-add-msg{ font-size:13px; margin-top:12px; color:#7a8c5c; }
- 
-  /* Reviews */
-  .reviews-wrap{ max-width:1100px; margin:0 auto; padding:0 24px 100px; }
-  .reviews-head{ display:flex; gap:40px; flex-wrap:wrap; align-items:flex-start; margin-bottom:34px; }
-  .reviews-score{ text-align:center; }
-  .reviews-score .num{ font-family:var(--font-display); font-size:56px; line-height:1; }
-  .reviews-score .stars{ color:#e8b13c; font-size:16px; margin:6px 0; }
-  .reviews-score .count{ font-size:13px; color:var(--text-dim); }
-  .reviews-bars{ flex:1; min-width:220px; }
-  .rbar-row{ display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-dim); margin-bottom:6px; }
-  .rbar-track{ flex:1; height:8px; border-radius:99px; background:var(--surface); overflow:hidden; }
-  .rbar-fill{ height:100%; background:#e8b13c; }
- 
-  .review-item{ padding:20px 0; border-top:1px solid var(--line); }
-  .review-item .stars{ color:#e8b13c; font-size:14px; margin-bottom:6px; }
-  .review-item .who{ font-weight:700; font-size:14px; margin-bottom:4px; }
-  .review-item .when{ font-size:12px; color:var(--text-dim); margin-bottom:8px; }
-  .review-item .comment{ font-size:14px; line-height:1.6; color:var(--text-dim); }
- 
-  .review-form{
-    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md);
-    padding:26px; margin-top:30px;
-  }
-  .review-form h4{ font-family:var(--font-display); font-size:20px; text-transform:uppercase; margin-bottom:16px; }
-  .star-picker{ display:flex; gap:6px; margin-bottom:16px; }
-  .star-picker span{ font-size:26px; cursor:pointer; color:var(--line); transition:color .15s ease; }
-  .star-picker span.active{ color:#e8b13c; }
-  .review-form input, .review-form textarea{
-    width:100%; background:var(--bg); border:1px solid var(--line); border-radius:10px;
-    padding:11px 14px; color:var(--text); font-family:var(--font-body); font-size:14px; margin-bottom:12px;
-  }
-</style>
 </head>
 <body class="page-fade">
  
@@ -136,7 +29,7 @@
   <button class="drawer-close" aria-label="Close menu">✕</button>
   <ul class="drawer-nav">
     <li><a href="index.html">Home</a></li>
-    <li><a href="shop.html">Shop All</a></li>
+    <li><a href="shop.html" class="active">Shop All</a></li>
     <li><a href="shop.html?cat=tshirts">T-Shirts</a></li>
     <li><a href="shop.html?cat=shorts">Shorts</a></li>
     <li><a href="shop.html?cat=alo">Alo</a></li>
@@ -150,9 +43,21 @@
   </div>
 </nav>
  
-<div id="product-root">
-  <p style="padding:60px 24px; text-align:center; color:var(--text-dim);">Loading product…</p>
+<div class="section-head">
+  <div>
+    <div class="meta"><span>2026</span><span>SEPTEMBER</span></div>
+    <h2 id="shop-title">SHOP</h2>
+  </div>
 </div>
+ 
+<div class="tabs" id="tabs">
+  <button class="tab" data-cat="all">All</button>
+  <button class="tab" data-cat="tshirts">T-Shirts</button>
+  <button class="tab" data-cat="shorts">Shorts</button>
+  <button class="tab" data-cat="alo">Alo</button>
+</div>
+ 
+<div class="grid" id="product-grid"></div>
  
 <footer class="footer-panel">
   <div class="handle">@SYNKD.<br/>STREETWEAR</div>
@@ -160,6 +65,7 @@
 </footer>
  
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/products.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/main.js"></script>
 <script>
@@ -167,249 +73,79 @@
   const SUPABASE_KEY = "sb_publishable_2GuIxS-f8B4czOyCxc-KdQ_J-X7AxYY";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
  
-  const root = document.getElementById("product-root");
-  const params = new URLSearchParams(window.location.search);
-  const productId = params.get("id");
+  let PRODUCTS = [];
+  const grid = document.getElementById("product-grid");
+  const tabs = document.querySelectorAll(".tab");
+  const titleEl = document.getElementById("shop-title");
  
-  let currentProduct = null;
-  let selectedColor = null;
-  let selectedSize = null;
-  let qty = 1;
-  let galleryImages = [];
+  function renderProducts(category) {
+    const items = category === "all" ? PRODUCTS : PRODUCTS.filter(p => p.category === category);
+    grid.innerHTML = "";
  
-  function starString(rating) {
-    const full = Math.round(rating);
-    return "★".repeat(full) + "☆".repeat(5 - full);
-  }
- 
-  async function loadProduct() {
-    if (!productId) {
-      root.innerHTML = `<p style="padding:60px 24px; text-align:center; color:var(--text-dim);">Product not found.</p>`;
+    if (items.length === 0) {
+      grid.innerHTML = `<p style="padding:60px 24px; color:var(--text-dim); grid-column:1/-1; text-align:center;">No products here yet — check back soon.</p>`;
       return;
     }
  
-    const { data: product, error } = await sb.from("products").select("*").eq("id", productId).single();
+    items.forEach((p, i) => {
+      const card = document.createElement("a");
+      card.href = `product.html?id=${p.id}`;
+      card.className = "card";
+      card.style.animationDelay = (i * 0.04) + "s";
+      card.innerHTML = `
+        <div class="card-media">
+          ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span class="placeholder">PHOTO COMING SOON</span>`}
+        </div>
+        <div class="card-body">
+          <h3>${p.name}</h3>
+          <p class="card-price">$${p.price} USD</p>
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
  
-    if (error || !product) {
-      root.innerHTML = `<p style="padding:60px 24px; text-align:center; color:var(--text-dim);">Product not found.</p>`;
+  function setActiveTab(cat) {
+    tabs.forEach(t => t.classList.toggle("active", t.dataset.cat === cat));
+    titleEl.textContent = cat === "all" ? "SHOP" : CATEGORY_LABELS[cat].toUpperCase();
+  }
+ 
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      const cat = tab.dataset.cat;
+      history.replaceState(null, "", cat === "all" ? "shop.html" : `shop.html?cat=${cat}`);
+      setActiveTab(cat);
+      renderProducts(cat);
+    });
+  });
+ 
+  async function loadProducts() {
+    grid.innerHTML = `<p style="padding:60px 24px; color:var(--text-dim); grid-column:1/-1; text-align:center;">Loading products…</p>`;
+ 
+    const { data, error } = await sb.from("products").select("*").order("created_at", { ascending: false });
+ 
+    if (error) {
+      grid.innerHTML = `<p style="padding:60px 24px; color:#c0533e; grid-column:1/-1; text-align:center;">Could not load products right now.</p>`;
       return;
     }
  
-    currentProduct = product;
-    galleryImages = [product.image_url, ...(product.extra_images || [])].filter(Boolean);
-    const sizes = (product.sizes && product.sizes.length) ? product.sizes : ["S", "M", "L", "XL", "XXL"];
-    const colors = product.colors || [];
-    selectedSize = sizes[0];
-    selectedColor = colors[0] || null;
+    PRODUCTS = data.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      category: p.category,
+      sizes: (p.sizes && p.sizes.length) ? p.sizes : ["S", "M", "L", "XL", "XXL"],
+      image: p.image_url,
+    }));
  
-    root.innerHTML = `
-      <div class="product-wrap">
-        <div>
-          <div class="pg-main" id="pgMain">
-            ${galleryImages[0] ? `<img src="${galleryImages[0]}" alt="${product.name}">` : `<span class="placeholder">PHOTO COMING SOON</span>`}
-          </div>
-          ${galleryImages.length > 1 ? `<div class="pg-thumbs" id="pgThumbs">${galleryImages.map((img, i) => `
-            <div class="pg-thumb ${i === 0 ? "active" : ""}" data-src="${img}"><img src="${img}"></div>
-          `).join("")}</div>` : ""}
-        </div>
-        <div>
-          <h1 class="pi-name">${product.name}</h1>
-          <div class="pi-price">$${product.price} USD</div>
- 
-          ${colors.length ? `
-          <div class="pi-section">
-            <span class="pi-label">Color: <span id="colorLabel">${colors[0]}</span></span>
-            <div class="pi-colors" id="colorPicker">
-              ${colors.map((c, i) => `<div class="pi-color ${i === 0 ? "active" : ""}" style="background:${c}" data-color="${c}" title="${c}"></div>`).join("")}
-            </div>
-          </div>` : ""}
- 
-          <div class="pi-section">
-            <span class="pi-label">Size</span>
-            <div class="pi-sizes" id="sizePicker">
-              ${sizes.map((s, i) => `<div class="pi-size-btn ${i === 0 ? "active" : ""}" data-size="${s}">${s}</div>`).join("")}
-            </div>
-          </div>
- 
-          <div class="pi-section">
-            <span class="pi-label">Quantity</span>
-            <div class="pi-qty">
-              <button id="qtyMinus">−</button>
-              <span id="qtyVal">1</span>
-              <button id="qtyPlus">+</button>
-            </div>
-          </div>
- 
-          <button class="btn btn-primary btn-full" id="addToCartBtn">Add to cart</button>
-          <p class="pi-add-msg" id="addMsg"></p>
-        </div>
-      </div>
- 
-      ${product.description ? `
-      <div class="product-details-wrap">
-        <h3 class="pd-title">Product Details</h3>
-        <p class="pi-desc">${product.description}</p>
-      </div>` : ""}
- 
-      <div class="reviews-wrap" id="reviewsWrap">
-        <p style="color:var(--text-dim);">Loading reviews…</p>
-      </div>
-    `;
- 
-    // Gallery thumb clicks
-    document.querySelectorAll(".pg-thumb").forEach(thumb => {
-      thumb.addEventListener("click", () => {
-        document.querySelectorAll(".pg-thumb").forEach(t => t.classList.remove("active"));
-        thumb.classList.add("active");
-        document.getElementById("pgMain").innerHTML = `<img src="${thumb.dataset.src}" alt="${product.name}">`;
-      });
-    });
- 
-    // Color picker
-    document.querySelectorAll(".pi-color").forEach(el => {
-      el.addEventListener("click", () => {
-        document.querySelectorAll(".pi-color").forEach(c => c.classList.remove("active"));
-        el.classList.add("active");
-        selectedColor = el.dataset.color;
-        const label = document.getElementById("colorLabel");
-        if (label) label.textContent = selectedColor;
-      });
-    });
- 
-    // Size picker
-    document.querySelectorAll(".pi-size-btn").forEach(el => {
-      el.addEventListener("click", () => {
-        document.querySelectorAll(".pi-size-btn").forEach(s => s.classList.remove("active"));
-        el.classList.add("active");
-        selectedSize = el.dataset.size;
-      });
-    });
- 
-    // Quantity
-    document.getElementById("qtyMinus").addEventListener("click", () => {
-      qty = Math.max(1, qty - 1);
-      document.getElementById("qtyVal").textContent = qty;
-    });
-    document.getElementById("qtyPlus").addEventListener("click", () => {
-      qty = qty + 1;
-      document.getElementById("qtyVal").textContent = qty;
-    });
- 
-    // Add to cart
-    document.getElementById("addToCartBtn").addEventListener("click", () => {
-      const productForCart = {
-        id: product.id,
-        name: product.name + (selectedColor ? ` (${selectedColor})` : ""),
-        price: product.price,
-        image: product.image_url,
-      };
-      addToCart(productForCart, qty, selectedSize);
-      const msg = document.getElementById("addMsg");
-      msg.textContent = "Added to cart ✓";
-      setTimeout(() => { msg.textContent = ""; }, 2000);
-    });
- 
-    loadReviews();
+    const params = new URLSearchParams(window.location.search);
+    const initialCat = params.get("cat") && CATEGORY_LABELS[params.get("cat")] ? params.get("cat") : "all";
+    setActiveTab(initialCat);
+    renderProducts(initialCat);
   }
  
-  async function loadReviews() {
-    const wrap = document.getElementById("reviewsWrap");
-    const { data: reviews, error } = await sb
-      .from("reviews")
-      .select("*")
-      .eq("product_id", productId)
-      .order("created_at", { ascending: false });
- 
-    const list = error ? [] : reviews;
-    const total = list.length;
-    const avg = total ? list.reduce((s, r) => s + r.rating, 0) / total : 0;
-    const counts = [5, 4, 3, 2, 1].map(star => list.filter(r => r.rating === star).length);
- 
-    wrap.innerHTML = `
-      <div class="reviews-head">
-        <div class="reviews-score">
-          <div class="num">${total ? avg.toFixed(1) : "—"}</div>
-          <div class="stars">${starString(avg)}</div>
-          <div class="count">${total} review${total === 1 ? "" : "s"}</div>
-        </div>
-        <div class="reviews-bars">
-          ${[5, 4, 3, 2, 1].map((star, i) => `
-            <div class="rbar-row">
-              <span style="width:14px;">${star}</span>
-              <div class="rbar-track"><div class="rbar-fill" style="width:${total ? (counts[i] / total * 100) : 0}%"></div></div>
-              <span style="width:20px; text-align:right;">${counts[i]}</span>
-            </div>
-          `).join("")}
-        </div>
-      </div>
- 
-      <div id="reviewList">
-        ${total === 0
-          ? `<p style="color:var(--text-dim); font-size:14px;">No reviews yet — be the first to leave one!</p>`
-          : list.map(r => `
-            <div class="review-item">
-              <div class="stars">${starString(r.rating)}</div>
-              <div class="who">${r.customer_name}</div>
-              <div class="when">${new Date(r.created_at).toLocaleDateString()}</div>
-              ${r.comment ? `<div class="comment">${r.comment}</div>` : ""}
-            </div>
-          `).join("")}
-      </div>
- 
-      <div class="review-form">
-        <h4>Leave a review</h4>
-        <div class="star-picker" id="starPicker">
-          ${[1,2,3,4,5].map(n => `<span data-star="${n}">★</span>`).join("")}
-        </div>
-        <input type="text" id="reviewName" placeholder="Your name">
-        <textarea id="reviewComment" rows="3" placeholder="What did you think? (optional)"></textarea>
-        <button class="btn btn-primary" id="submitReviewBtn">Submit review</button>
-        <p class="pi-add-msg" id="reviewMsg"></p>
-      </div>
-    `;
- 
-    let chosenStar = 0;
-    const starEls = document.querySelectorAll("#starPicker span");
-    starEls.forEach(el => {
-      el.addEventListener("click", () => {
-        chosenStar = parseInt(el.dataset.star);
-        starEls.forEach(s => s.classList.toggle("active", parseInt(s.dataset.star) <= chosenStar));
-      });
-    });
- 
-    document.getElementById("submitReviewBtn").addEventListener("click", async () => {
-      const reviewMsg = document.getElementById("reviewMsg");
-      const name = document.getElementById("reviewName").value.trim();
-      const comment = document.getElementById("reviewComment").value.trim();
- 
-      if (!name || chosenStar === 0) {
-        reviewMsg.textContent = "Please add your name and pick a star rating.";
-        reviewMsg.style.color = "#c0533e";
-        return;
-      }
- 
-      reviewMsg.textContent = "Submitting…";
-      reviewMsg.style.color = "var(--text-dim)";
- 
-      const { error } = await sb.from("reviews").insert({
-        product_id: productId,
-        customer_name: name,
-        rating: chosenStar,
-        comment,
-      });
- 
-      if (error) {
-        reviewMsg.textContent = error.message;
-        reviewMsg.style.color = "#c0533e";
-        return;
-      }
- 
-      loadReviews();
-    });
-  }
- 
-  loadProduct();
+  loadProducts();
 </script>
 </body>
 </html>
+ 
  
