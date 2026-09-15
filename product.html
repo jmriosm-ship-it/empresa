@@ -98,6 +98,10 @@
   .review-item .who{ font-weight:700; font-size:14px; margin-bottom:4px; }
   .review-item .when{ font-size:12px; color:var(--text-dim); margin-bottom:8px; }
   .review-item .comment{ font-size:14px; line-height:1.6; color:var(--text-dim); }
+  .review-delete-btn{
+    background:none; border:1px solid #c0533e; color:#c0533e; border-radius:99px;
+    padding:5px 14px; font-size:11px; text-transform:uppercase; cursor:pointer; margin-top:10px;
+  }
  
   .review-form{
     background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md);
@@ -340,6 +344,9 @@
       .eq("product_id", productId)
       .order("created_at", { ascending: false });
  
+    const { data: { session } } = await sb.auth.getSession();
+    const isAdmin = !!session;
+ 
     const list = error ? [] : reviews;
     const total = list.length;
     const avg = total ? list.reduce((s, r) => s + r.rating, 0) / total : 0;
@@ -372,6 +379,7 @@
               <div class="who">${r.customer_name}</div>
               <div class="when">${new Date(r.created_at).toLocaleDateString()}</div>
               ${r.comment ? `<div class="comment">${r.comment}</div>` : ""}
+              ${isAdmin ? `<button class="review-delete-btn" data-review-id="${r.id}">Delete</button>` : ""}
             </div>
           `).join("")}
       </div>
@@ -387,6 +395,14 @@
         <p class="pi-add-msg" id="reviewMsg"></p>
       </div>
     `;
+ 
+    wrap.querySelectorAll(".review-delete-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("Delete this review?")) return;
+        await sb.from("reviews").delete().eq("id", btn.dataset.reviewId);
+        loadReviews();
+      });
+    });
  
     let chosenStar = 0;
     const starEls = document.querySelectorAll("#starPicker span");
