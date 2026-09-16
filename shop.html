@@ -4,10 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Shop — SYNKD Streetwear</title>
+<link rel="icon" href="assets/logo.png" type="image/png" />
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="page-fade">
- 
+
 <header class="site-header">
   <a href="index.html" class="logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -23,7 +24,7 @@
     <button class="menu-btn" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </header>
- 
+
 <div class="drawer-overlay"></div>
 <nav class="drawer">
   <button class="drawer-close" aria-label="Close menu">✕</button>
@@ -42,32 +43,32 @@
     WhatsApp 551 312-8280
   </div>
 </nav>
- 
+
 <div class="section-head">
   <div>
     <div class="meta"><span>2026</span><span>SEPTEMBER</span></div>
     <h2 id="shop-title">SHOP</h2>
   </div>
 </div>
- 
+
 <div class="tabs" id="tabs">
   <button class="tab" data-cat="all">All</button>
   <button class="tab" data-cat="tshirts">T-Shirts</button>
   <button class="tab" data-cat="shorts">Shorts</button>
   <button class="tab" data-cat="alo">Alo</button>
 </div>
- 
+
 <div class="search-wrap">
   <input type="text" id="searchInput" class="search-input" placeholder="Search products...">
 </div>
- 
+
 <div class="grid" id="product-grid"></div>
- 
+
 <footer class="footer-panel">
   <div class="handle">@SYNKD.<br/>STREETWEAR</div>
   <p>You are just one step away from holding the product you've always dreamed of in your hands.</p>
 </footer>
- 
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/products.js"></script>
 <script src="js/cart.js"></script>
@@ -76,7 +77,7 @@
   const SUPABASE_URL = "https://zqjsvrrsbtovdilflkbp.supabase.co";
   const SUPABASE_KEY = "sb_publishable_2GuIxS-f8B4czOyCxc-KdQ_J-X7AxYY";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
- 
+
   let PRODUCTS = [];
   const grid = document.getElementById("product-grid");
   const tabs = document.querySelectorAll(".tab");
@@ -84,7 +85,7 @@
   const searchInput = document.getElementById("searchInput");
   let currentCat = "all";
   let currentSearch = "";
- 
+
   function showSkeleton() {
     grid.innerHTML = Array.from({ length: 6 }).map(() => `
       <div class="skeleton-card">
@@ -94,7 +95,7 @@
       </div>
     `).join("");
   }
- 
+
   function renderProducts() {
     let items = currentCat === "all" ? PRODUCTS : PRODUCTS.filter(p => p.category === currentCat);
     if (currentSearch.trim()) {
@@ -102,12 +103,12 @@
       items = items.filter(p => p.name.toLowerCase().includes(q));
     }
     grid.innerHTML = "";
- 
+
     if (items.length === 0) {
       grid.innerHTML = `<p style="padding:60px 24px; color:var(--text-dim); grid-column:1/-1; text-align:center;">No products found — try a different search or category.</p>`;
       return;
     }
- 
+
     items.forEach((p, i) => {
       const card = document.createElement("a");
       card.href = `product.html?id=${p.id}`;
@@ -123,15 +124,15 @@
         </div>`;
       grid.appendChild(card);
     });
- 
+
     observeReveals(grid);
   }
- 
+
   function setActiveTab(cat) {
     tabs.forEach(t => t.classList.toggle("active", t.dataset.cat === cat));
     titleEl.textContent = cat === "all" ? "SHOP" : CATEGORY_LABELS[cat].toUpperCase();
   }
- 
+
   tabs.forEach(tab => {
     tab.addEventListener("click", () => {
       currentCat = tab.dataset.cat;
@@ -140,22 +141,22 @@
       renderProducts();
     });
   });
- 
+
   searchInput.addEventListener("input", () => {
     currentSearch = searchInput.value;
     renderProducts();
   });
- 
+
   async function loadProducts() {
     showSkeleton();
- 
+
     const { data, error } = await sb.from("products").select("*").order("created_at", { ascending: false });
- 
+
     if (error) {
       grid.innerHTML = `<p style="padding:60px 24px; color:#c0533e; grid-column:1/-1; text-align:center;">Could not load products right now.</p>`;
       return;
     }
- 
+
     PRODUCTS = data.map(p => ({
       id: p.id,
       name: p.name,
@@ -164,13 +165,13 @@
       sizes: (p.sizes && p.sizes.length) ? p.sizes : ["S", "M", "L", "XL", "XXL"],
       image: p.image_url,
     }));
- 
+
     const params = new URLSearchParams(window.location.search);
     currentCat = params.get("cat") && CATEGORY_LABELS[params.get("cat")] ? params.get("cat") : "all";
     setActiveTab(currentCat);
     renderProducts();
   }
- 
+
   loadProducts();
 </script>
 </body>

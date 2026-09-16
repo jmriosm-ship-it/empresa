@@ -1,11 +1,10 @@
-
-Admin · HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Admin — SYNKD Streetwear</title>
+<link rel="icon" href="assets/logo.png" type="image/png" />
 <link rel="stylesheet" href="css/style.css" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -61,7 +60,7 @@ Admin · HTML
 </style>
 </head>
 <body class="page-fade">
- 
+
 <header class="site-header">
   <a href="index.html" class="logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -70,9 +69,9 @@ Admin · HTML
     SYNKD
   </a>
 </header>
- 
+
 <div class="admin-wrap">
- 
+
   <!-- LOGIN -->
   <div class="admin-box" id="loginBox">
     <h3>Admin Login</h3>
@@ -87,15 +86,15 @@ Admin · HTML
     <button class="btn-primary" id="loginBtn">Log In</button>
     <p class="admin-msg" id="loginMsg"></p>
   </div>
- 
+
   <!-- ADMIN PANEL (hidden until logged in) -->
   <div id="adminPanel">
- 
+
     <div class="admin-box" style="display:flex; justify-content:space-between; align-items:center;">
       <span style="font-size:14px; color:var(--text-dim);">Logged in as <span id="loggedEmail"></span></span>
       <button class="btn-danger" id="logoutBtn">Log out</button>
     </div>
- 
+
     <div class="admin-box">
       <h3>Add product</h3>
       <div class="admin-field">
@@ -128,7 +127,7 @@ Admin · HTML
           <label><input type="checkbox" value="XXL" checked> XXL</label>
         </div>
       </div>
- 
+
       <div class="admin-field">
         <label>Photos (up to 4) — each can have its own color</label>
         <p class="hint" style="margin-top:0; margin-bottom:10px;">
@@ -156,29 +155,29 @@ Admin · HTML
           <input type="text" id="color4" placeholder="Color (optional)">
         </div>
       </div>
- 
+
       <button class="btn-primary" id="addProductBtn">Add product</button>
       <p class="admin-msg" id="addMsg"></p>
     </div>
- 
+
     <div class="admin-box">
       <h3>Current products</h3>
       <div id="productList">Loading…</div>
     </div>
- 
+
   </div>
 </div>
- 
+
 <script>
   // ⚠️ La "publishable key" es segura de tener aquí visible, no es una contraseña.
   const SUPABASE_URL = "https://zqjsvrrsbtovdilflkbp.supabase.co";
   const SUPABASE_KEY = "sb_publishable_2GuIxS-f8B4czOyCxc-KdQ_J-X7AxYY";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
- 
+
   const loginBox = document.getElementById("loginBox");
   const adminPanel = document.getElementById("adminPanel");
   const loginMsg = document.getElementById("loginMsg");
- 
+
   async function checkSession() {
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
@@ -191,7 +190,7 @@ Admin · HTML
       adminPanel.style.display = "none";
     }
   }
- 
+
   document.getElementById("loginBtn").addEventListener("click", async () => {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
@@ -205,12 +204,12 @@ Admin · HTML
       checkSession();
     }
   });
- 
+
   document.getElementById("logoutBtn").addEventListener("click", async () => {
     await sb.auth.signOut();
     checkSession();
   });
- 
+
   async function loadProducts() {
     const listEl = document.getElementById("productList");
     const { data, error } = await sb.from("products").select("*").order("created_at", { ascending: false });
@@ -236,7 +235,7 @@ Admin · HTML
         <button class="btn-danger" data-delete="${p.id}">Delete</button>
       </div>
     `}).join("");
- 
+
     listEl.querySelectorAll("[data-delete]").forEach(btn => {
       btn.addEventListener("click", async () => {
         if (!confirm("Delete this product?")) return;
@@ -246,7 +245,7 @@ Admin · HTML
       });
     });
   }
- 
+
   async function uploadImage(file) {
     const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
     const { error } = await sb.storage.from("product-images").upload(filePath, file);
@@ -254,7 +253,7 @@ Admin · HTML
     const { data } = sb.storage.from("product-images").getPublicUrl(filePath);
     return data.publicUrl;
   }
- 
+
   document.getElementById("addProductBtn").addEventListener("click", async () => {
     const addMsg = document.getElementById("addMsg");
     const name = document.getElementById("pName").value.trim();
@@ -262,12 +261,12 @@ Admin · HTML
     const description = document.getElementById("pDescription").value.trim();
     const category = document.getElementById("pCategory").value;
     const sizes = Array.from(document.querySelectorAll(".admin-checks input:checked")).map(cb => cb.value);
- 
+
     const slots = [1, 2, 3, 4].map(n => ({
       file: document.getElementById(`photo${n}`).files[0] || null,
       color: document.getElementById(`color${n}`).value.trim(),
     })).filter(s => s.file);
- 
+
     if (!name || !price || sizes.length === 0) {
       addMsg.textContent = "Please fill in name, price, and at least one size.";
       addMsg.className = "admin-msg err";
@@ -278,27 +277,27 @@ Admin · HTML
       addMsg.className = "admin-msg err";
       return;
     }
- 
+
     addMsg.textContent = "Uploading photos…";
     addMsg.className = "admin-msg";
- 
+
     try {
       const photos = [];
       for (const slot of slots) {
         const url = await uploadImage(slot.file);
         photos.push({ url, color: slot.color || "" });
       }
- 
+
       addMsg.textContent = "Saving product…";
- 
+
       const { error: insertError } = await sb.from("products").insert({
         name, price, description, category, sizes,
         photos,
         image_url: photos[0].url, // se mantiene por compatibilidad con el catálogo
       });
- 
+
       if (insertError) throw insertError;
- 
+
       addMsg.textContent = "Product added!";
       addMsg.className = "admin-msg ok";
       document.getElementById("pName").value = "";
@@ -314,10 +313,9 @@ Admin · HTML
       addMsg.className = "admin-msg err";
     }
   });
- 
+
   checkSession();
 </script>
- 
+
 </body>
 </html>
- 
