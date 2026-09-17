@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="google-site-verification" content="zvSQtmTxd0Ys-_wvbVODJXpSpiELWI4dEKwivi6-n5Y" />
 <title>Admin — SYNKD Streetwear</title>
 <link rel="icon" href="assets/logo.png" type="image/png" />
 <link rel="stylesheet" href="css/style.css" />
@@ -21,12 +22,12 @@
     padding:11px 14px; color:var(--text); font-family:var(--font-body); font-size:14px;
   }
   .admin-field .hint{ font-size:12px; color:var(--text-dim); margin-top:6px; }
-  .admin-checks{ display:flex; gap:10px; flex-wrap:wrap; }
-  .admin-checks label{
-    display:flex; align-items:center; gap:6px; background:var(--bg);
-    border:1px solid var(--line); border-radius:var(--radius-pill);
-    padding:8px 14px; font-size:13px; cursor:pointer;
+  .size-stock-row{
+    display:grid; grid-template-columns:auto 1fr 90px; align-items:center; gap:12px;
+    padding:8px 0; border-bottom:1px solid var(--line);
   }
+  .size-stock-row label{ display:flex; align-items:center; gap:8px; font-size:14px; margin:0; text-transform:none; }
+  .size-stock-row input[type="number"]{ padding:8px 10px; }
   .photo-slot{
     border:1px dashed var(--line); border-radius:12px; padding:14px;
     margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px;
@@ -38,19 +39,27 @@
     letter-spacing:0.5px; cursor:pointer; transition:transform .2s ease, background .2s ease;
   }
   .btn-primary:hover{ background:var(--accent-dim); transform:translateY(-2px); }
+  .btn-secondary{
+    background:none; border:1px solid var(--line); color:var(--text); border-radius:var(--radius-pill);
+    padding:10px 20px; font-size:13px; cursor:pointer; text-transform:uppercase; margin-left:10px;
+  }
   .btn-danger{
     background:none; border:1px solid #c0533e; color:#c0533e; border-radius:var(--radius-pill);
     padding:8px 16px; font-size:12px; cursor:pointer; text-transform:uppercase;
   }
+  .btn-edit{
+    background:none; border:1px solid var(--accent); color:var(--accent); border-radius:var(--radius-pill);
+    padding:8px 16px; font-size:12px; cursor:pointer; text-transform:uppercase; margin-right:8px;
+  }
   .admin-product-row{
     display:flex; align-items:center; gap:14px; padding:14px 0;
-    border-bottom:1px solid var(--line);
+    border-bottom:1px solid var(--line); flex-wrap:wrap;
   }
   .admin-thumb{
     width:54px; height:54px; border-radius:10px; object-fit:cover;
     background:var(--frame); flex-shrink:0;
   }
-  .admin-product-info{ flex:1; }
+  .admin-product-info{ flex:1; min-width:200px; }
   .admin-product-info h4{ font-size:14px; font-weight:700; text-transform:uppercase; }
   .admin-product-info span{ font-size:13px; color:var(--text-dim); }
   .admin-msg{ font-size:13px; margin-top:10px; }
@@ -60,7 +69,7 @@
 </style>
 </head>
 <body class="page-fade">
-
+ 
 <header class="site-header">
   <a href="index.html" class="logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -69,9 +78,9 @@
     SYNKD
   </a>
 </header>
-
+ 
 <div class="admin-wrap">
-
+ 
   <!-- LOGIN -->
   <div class="admin-box" id="loginBox">
     <h3>Admin Login</h3>
@@ -86,17 +95,17 @@
     <button class="btn-primary" id="loginBtn">Log In</button>
     <p class="admin-msg" id="loginMsg"></p>
   </div>
-
+ 
   <!-- ADMIN PANEL (hidden until logged in) -->
   <div id="adminPanel">
-
+ 
     <div class="admin-box" style="display:flex; justify-content:space-between; align-items:center;">
       <span style="font-size:14px; color:var(--text-dim);">Logged in as <span id="loggedEmail"></span></span>
       <button class="btn-danger" id="logoutBtn">Log out</button>
     </div>
-
+ 
     <div class="admin-box">
-      <h3>Add product</h3>
+      <h3 id="formTitle">Add product</h3>
       <div class="admin-field">
         <label>Name</label>
         <input type="text" id="pName" placeholder="Black LV">
@@ -117,17 +126,13 @@
           <option value="alo">Alo</option>
         </select>
       </div>
+ 
       <div class="admin-field">
-        <label>Available sizes</label>
-        <div class="admin-checks">
-          <label><input type="checkbox" value="S" checked> S</label>
-          <label><input type="checkbox" value="M" checked> M</label>
-          <label><input type="checkbox" value="L" checked> L</label>
-          <label><input type="checkbox" value="XL" checked> XL</label>
-          <label><input type="checkbox" value="XXL" checked> XXL</label>
-        </div>
+        <label>Sizes & stock quantity</label>
+        <p class="hint" style="margin-top:0; margin-bottom:10px;">Check the sizes you're offering and type how many you have of each.</p>
+        <div id="sizeStockList"></div>
       </div>
-
+ 
       <div class="admin-field">
         <label>Photos (up to 4) — each can have its own color</label>
         <p class="hint" style="margin-top:0; margin-bottom:10px;">
@@ -135,7 +140,7 @@
           customers can click that color to switch to that exact photo. Leave the color blank for a plain extra photo (like a back view) that isn't tied to a color.
         </p>
         <div class="photo-slot">
-          <span class="slot-label">Photo 1 (required)</span>
+          <span class="slot-label">Photo 1 (required for new products)</span>
           <input type="file" id="photo1" accept="image/*">
           <input type="text" id="color1" placeholder="Color (optional), e.g. Black">
         </div>
@@ -154,43 +159,69 @@
           <input type="file" id="photo4" accept="image/*">
           <input type="text" id="color4" placeholder="Color (optional)">
         </div>
+        <p class="hint" id="editPhotoNote" style="display:none;">Editing an existing product? Photos stay the same unless you pick new files above — new files will REPLACE all current photos.</p>
       </div>
-
-      <button class="btn-primary" id="addProductBtn">Add product</button>
+ 
+      <button class="btn-primary" id="saveProductBtn">Add product</button>
+      <button class="btn-secondary" id="cancelEditBtn" style="display:none;">Cancel edit</button>
       <p class="admin-msg" id="addMsg"></p>
     </div>
-
+ 
     <div class="admin-box">
       <h3>Current products</h3>
       <div id="productList">Loading…</div>
     </div>
-
+ 
   </div>
 </div>
-
+ 
 <script>
-  // ⚠️ La "publishable key" es segura de tener aquí visible, no es una contraseña.
   const SUPABASE_URL = "https://zqjsvrrsbtovdilflkbp.supabase.co";
   const SUPABASE_KEY = "sb_publishable_2GuIxS-f8B4czOyCxc-KdQ_J-X7AxYY";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+ 
+  const SIZE_SETS = {
+    tshirts: ["S", "M", "L", "XL", "XXL"],
+    alo: ["S", "M", "L", "XL", "XXL"],
+    shorts: ["26", "28", "30", "32", "34", "36", "38"],
+  };
+ 
+  let editingId = null; // null = adding a new product; otherwise the id being edited
+ 
   const loginBox = document.getElementById("loginBox");
   const adminPanel = document.getElementById("adminPanel");
   const loginMsg = document.getElementById("loginMsg");
-
+  const categorySelect = document.getElementById("pCategory");
+  const sizeStockList = document.getElementById("sizeStockList");
+ 
+  function renderSizeStockInputs(sizes, existingStock = {}) {
+    sizeStockList.innerHTML = sizes.map(s => `
+      <div class="size-stock-row">
+        <label><input type="checkbox" class="size-check" value="${s}" ${existingStock[s] !== undefined || Object.keys(existingStock).length === 0 ? "checked" : ""}> ${s}</label>
+        <span></span>
+        <input type="number" class="size-qty" data-size="${s}" min="0" placeholder="Qty" value="${existingStock[s] !== undefined ? existingStock[s] : ""}">
+      </div>
+    `).join("");
+  }
+ 
+  categorySelect.addEventListener("change", () => {
+    renderSizeStockInputs(SIZE_SETS[categorySelect.value] || []);
+  });
+ 
   async function checkSession() {
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
       loginBox.style.display = "none";
       adminPanel.style.display = "block";
       document.getElementById("loggedEmail").textContent = session.user.email;
+      renderSizeStockInputs(SIZE_SETS[categorySelect.value]);
       loadProducts();
     } else {
       loginBox.style.display = "block";
       adminPanel.style.display = "none";
     }
   }
-
+ 
   document.getElementById("loginBtn").addEventListener("click", async () => {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
@@ -204,12 +235,31 @@
       checkSession();
     }
   });
-
+ 
   document.getElementById("logoutBtn").addEventListener("click", async () => {
     await sb.auth.signOut();
     checkSession();
   });
-
+ 
+  function resetForm() {
+    editingId = null;
+    document.getElementById("formTitle").textContent = "Add product";
+    document.getElementById("saveProductBtn").textContent = "Add product";
+    document.getElementById("cancelEditBtn").style.display = "none";
+    document.getElementById("editPhotoNote").style.display = "none";
+    document.getElementById("pName").value = "";
+    document.getElementById("pPrice").value = "";
+    document.getElementById("pDescription").value = "";
+    categorySelect.value = "tshirts";
+    renderSizeStockInputs(SIZE_SETS.tshirts);
+    [1, 2, 3, 4].forEach(n => {
+      document.getElementById(`photo${n}`).value = "";
+      document.getElementById(`color${n}`).value = "";
+    });
+  }
+ 
+  document.getElementById("cancelEditBtn").addEventListener("click", resetForm);
+ 
   async function loadProducts() {
     const listEl = document.getElementById("productList");
     const { data, error } = await sb.from("products").select("*").order("created_at", { ascending: false });
@@ -225,17 +275,20 @@
       const photos = p.photos || [];
       const thumb = photos[0] ? photos[0].url : p.image_url;
       const colorNames = photos.map(ph => ph.color).filter(Boolean);
+      const stock = p.stock || {};
+      const stockText = (p.sizes || []).map(s => `${s}:${stock[s] !== undefined ? stock[s] : "?"}`).join(", ");
       return `
       <div class="admin-product-row">
         <img class="admin-thumb" src="${thumb || ''}" onerror="this.style.background='var(--frame)'">
         <div class="admin-product-info">
           <h4>${p.name}</h4>
-          <span>$${p.price} USD · ${p.category} · ${(p.sizes || []).join(", ")}${colorNames.length ? " · Colors: " + colorNames.join(", ") : ""} · ${photos.length} photo${photos.length===1?"":"s"}</span>
+          <span>$${p.price} USD · ${p.category} · Stock: ${stockText}${colorNames.length ? " · Colors: " + colorNames.join(", ") : ""}</span>
         </div>
+        <button class="btn-edit" data-edit="${p.id}">Edit</button>
         <button class="btn-danger" data-delete="${p.id}">Delete</button>
       </div>
     `}).join("");
-
+ 
     listEl.querySelectorAll("[data-delete]").forEach(btn => {
       btn.addEventListener("click", async () => {
         if (!confirm("Delete this product?")) return;
@@ -244,8 +297,38 @@
         loadProducts();
       });
     });
+ 
+    listEl.querySelectorAll("[data-edit]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const product = data.find(p => p.id === btn.dataset.edit);
+        startEdit(product);
+      });
+    });
   }
-
+ 
+  function startEdit(product) {
+    editingId = product.id;
+    document.getElementById("formTitle").textContent = "Edit product";
+    document.getElementById("saveProductBtn").textContent = "Save changes";
+    document.getElementById("cancelEditBtn").style.display = "inline-block";
+    document.getElementById("editPhotoNote").style.display = "block";
+ 
+    document.getElementById("pName").value = product.name || "";
+    document.getElementById("pPrice").value = product.price || "";
+    document.getElementById("pDescription").value = product.description || "";
+    categorySelect.value = product.category || "tshirts";
+ 
+    const sizes = SIZE_SETS[categorySelect.value] || [];
+    const stock = product.stock || {};
+    renderSizeStockInputs(sizes, stock);
+    // uncheck sizes not in product.sizes, check the ones that are
+    sizeStockList.querySelectorAll(".size-check").forEach(cb => {
+      cb.checked = (product.sizes || []).includes(cb.value);
+    });
+ 
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+ 
   async function uploadImage(file) {
     const filePath = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
     const { error } = await sb.storage.from("product-images").upload(filePath, file);
@@ -253,69 +336,81 @@
     const { data } = sb.storage.from("product-images").getPublicUrl(filePath);
     return data.publicUrl;
   }
-
-  document.getElementById("addProductBtn").addEventListener("click", async () => {
+ 
+  document.getElementById("saveProductBtn").addEventListener("click", async () => {
     const addMsg = document.getElementById("addMsg");
     const name = document.getElementById("pName").value.trim();
     const price = parseFloat(document.getElementById("pPrice").value);
     const description = document.getElementById("pDescription").value.trim();
-    const category = document.getElementById("pCategory").value;
-    const sizes = Array.from(document.querySelectorAll(".admin-checks input:checked")).map(cb => cb.value);
-
+    const category = categorySelect.value;
+ 
+    const sizes = [];
+    const stock = {};
+    sizeStockList.querySelectorAll(".size-stock-row").forEach(row => {
+      const checkbox = row.querySelector(".size-check");
+      const qtyInput = row.querySelector(".size-qty");
+      if (checkbox.checked) {
+        sizes.push(checkbox.value);
+        stock[checkbox.value] = parseInt(qtyInput.value) || 0;
+      }
+    });
+ 
     const slots = [1, 2, 3, 4].map(n => ({
       file: document.getElementById(`photo${n}`).files[0] || null,
       color: document.getElementById(`color${n}`).value.trim(),
     })).filter(s => s.file);
-
+ 
     if (!name || !price || sizes.length === 0) {
       addMsg.textContent = "Please fill in name, price, and at least one size.";
       addMsg.className = "admin-msg err";
       return;
     }
-    if (slots.length === 0) {
+    if (!editingId && slots.length === 0) {
       addMsg.textContent = "Please add at least Photo 1.";
       addMsg.className = "admin-msg err";
       return;
     }
-
-    addMsg.textContent = "Uploading photos…";
+ 
+    addMsg.textContent = slots.length ? "Uploading photos…" : "Saving product…";
     addMsg.className = "admin-msg";
-
+ 
     try {
-      const photos = [];
-      for (const slot of slots) {
-        const url = await uploadImage(slot.file);
-        photos.push({ url, color: slot.color || "" });
+      const payload = { name, price, description, category, sizes, stock };
+ 
+      if (slots.length > 0) {
+        const photos = [];
+        for (const slot of slots) {
+          const url = await uploadImage(slot.file);
+          photos.push({ url, color: slot.color || "" });
+        }
+        payload.photos = photos;
+        payload.image_url = photos[0].url;
       }
-
+ 
       addMsg.textContent = "Saving product…";
-
-      const { error: insertError } = await sb.from("products").insert({
-        name, price, description, category, sizes,
-        photos,
-        image_url: photos[0].url, // se mantiene por compatibilidad con el catálogo
-      });
-
-      if (insertError) throw insertError;
-
-      addMsg.textContent = "Product added!";
+ 
+      let dbError;
+      if (editingId) {
+        const { error } = await sb.from("products").update(payload).eq("id", editingId);
+        dbError = error;
+      } else {
+        const { error } = await sb.from("products").insert(payload);
+        dbError = error;
+      }
+      if (dbError) throw dbError;
+ 
+      addMsg.textContent = editingId ? "Product updated!" : "Product added!";
       addMsg.className = "admin-msg ok";
-      document.getElementById("pName").value = "";
-      document.getElementById("pPrice").value = "";
-      document.getElementById("pDescription").value = "";
-      [1, 2, 3, 4].forEach(n => {
-        document.getElementById(`photo${n}`).value = "";
-        document.getElementById(`color${n}`).value = "";
-      });
+      resetForm();
       loadProducts();
     } catch (err) {
       addMsg.textContent = err.message || "Something went wrong.";
       addMsg.className = "admin-msg err";
     }
   });
-
+ 
   checkSession();
 </script>
-
+ 
 </body>
 </html>
