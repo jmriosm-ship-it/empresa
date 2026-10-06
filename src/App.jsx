@@ -15,6 +15,7 @@ import Policies from "./pages/Policies";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import LegacyRedirect from "./components/LegacyRedirect";
+import RouteSeo from "./components/RouteSeo";
 
 function App() {
   const { pathname } = useLocation();
@@ -25,6 +26,7 @@ function App() {
       <ToastProvider>
         <CursorBackground />
         <ScrollToTop />
+        <RouteSeo/>
         {!isAdmin && <Header />}
         <Routes>
           <Route path="/" element={<Home />} />

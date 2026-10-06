@@ -8,6 +8,7 @@ import Footer from "../components/Footer";
 import Reviews from "../components/Reviews";
 import RelatedProducts from "../components/RelatedProducts";
 import "../assets/product.css";
+import useSeo from "../hooks/useSeo";
 
 /*
   La URL sigue siendo /product?id=XXXX (igual que antes con product.html?id=XXXX).
@@ -103,6 +104,13 @@ function ProductDetail({ product }) {
   const [selectedColor, setSelectedColor] = useState(colorSet[0] || null);
   const [selectedSize, setSelectedSize] = useState(firstAvailable);
   const [qty, setQty] = useState(1);
+    const desc = (product.description || "").replace(/\s+/g, " ").trim();
+  useSeo({
+    title: `${product.name} | SYNKD Streetwear`,
+    description: desc ? desc.slice(0, 155) : `${product.name} — $${product.price} USD. Small batch streetwear from SYNKD.`,
+    path: `/product?id=${product.id}`,
+    image: photos[0]?.url || product.image_url || undefined,
+  });
   const [lightbox, setLightbox] = useState(false);
 
   const maxQty = hasStockData ? Math.max(1, stock[selectedSize] || 0) : 99;
