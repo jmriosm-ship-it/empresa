@@ -1,0 +1,12 @@
+# Links de la web vieja -> direcciones nuevas (redirección real 301, Netlify conserva lo que va después del "?")
+/shop.html       /shop       301
+/product.html    /product    301
+/cart.html       /cart       301
+/checkout.html   /checkout   301
+/contact.html    /contact    301
+/policies.html   /policies   301
+/admin.html      /admin      301
+
+# Todas las demás rutas cargan la app de React con código 200 (esto es lo que GitHub Pages no podía hacer).
+# Los archivos que sí existen (imágenes, JS, CSS) se sirven normal, esta regla solo aplica a lo que no existe.
+/*               /index.html 200
