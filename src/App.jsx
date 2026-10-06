@@ -14,6 +14,7 @@ import Contact from "./pages/Contact";
 import Policies from "./pages/Policies";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import LegacyRedirect from "./components/LegacyRedirect";
 
 function App() {
   const { pathname } = useLocation();
@@ -34,6 +35,15 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/policies" element={<Policies />} />
           <Route path="/admin" element={<Admin />} />
+          {/* Direcciones de la web vieja (HTML) -> direcciones nuevas */}
+          <Route path="/index.html" element={<LegacyRedirect to="/" />} />
+          <Route path="/shop.html" element={<LegacyRedirect to="/shop" />} />
+          <Route path="/product.html" element={<LegacyRedirect to="/product" />} />
+          <Route path="/cart.html" element={<LegacyRedirect to="/cart" />} />
+          <Route path="/checkout.html" element={<LegacyRedirect to="/checkout" />} />
+          <Route path="/contact.html" element={<LegacyRedirect to="/contact" />} />
+          <Route path="/policies.html" element={<LegacyRedirect to="/policies" />} />
+          <Route path="/admin.html" element={<LegacyRedirect to="/admin" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </ToastProvider>
