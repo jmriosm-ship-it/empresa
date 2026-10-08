@@ -1,22 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { sb } from "../lib/supabase";
-import { CATEGORY_LABELS } from "../constants";
+import { useCategories } from "../context/CategoriesContext";
 import ProductCard from "../components/ProductCard";
 import Footer from "../components/Footer";
 import useReveal from "../hooks/useReveal";
 
-const TABS = [
-  { cat: "all", label: "All" },
-  { cat: "tshirts", label: "T-Shirts" },
-  { cat: "shorts", label: "Shorts" },
-  { cat: "alo", label: "Alo" },
-];
-
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
   const catParam = searchParams.get("cat");
-  const currentCat = catParam && CATEGORY_LABELS[catParam] ? catParam : "all";
+  const { categories, bySlug, loaded } = useCategories();
+  // mientras cargan las categorías no se descarta un ?cat= desconocido (puede ser una categoría nueva)
+  const currentCat = catParam && (bySlug[catParam] || !loaded) ? catParam : "all";
+  const tabs = [{ slug: "all", label: "All" }, ...categories];
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,13 +62,13 @@ export default function Shop() {
       <div className="section-head">
         <div>
           <div className="meta"><span>2026</span><span>SEPTEMBER</span></div>
-          <h2>{currentCat === "all" ? "SHOP" : CATEGORY_LABELS[currentCat].toUpperCase()}</h2>
+          <h2>{currentCat === "all" ? "SHOP" : (bySlug[currentCat]?.label ?? "").toUpperCase()}</h2>
         </div>
       </div>
 
       <div className="tabs">
-        {TABS.map((t) => (
-          <button key={t.cat} className={`tab ${currentCat === t.cat ? "active" : ""}`} onClick={() => selectCat(t.cat)}>
+        {tabs.map((t) => (
+          <button key={t.slug} className={`tab ${currentCat === t.slug ? "active" : ""}`} onClick={() => selectCat(t.slug)}>
             {t.label}
           </button>
         ))}

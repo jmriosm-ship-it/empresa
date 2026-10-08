@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
+import { CategoriesProvider } from "./context/CategoriesContext";
 import { ToastProvider } from "./context/ToastContext";
 import Header from "./components/Header";
 import CursorBackground from "./components/CursorBackground";
@@ -22,11 +23,12 @@ function App() {
   const isAdmin = pathname.startsWith("/admin"); // el admin trae su propio header (solo el logo)
 
   return (
+    <CategoriesProvider>
     <CartProvider>
       <ToastProvider>
         <CursorBackground />
         <ScrollToTop />
-        <RouteSeo/>
+        <RouteSeo />
         {!isAdmin && <Header />}
         <Routes>
           <Route path="/" element={<Home />} />
@@ -50,6 +52,7 @@ function App() {
         </Routes>
       </ToastProvider>
     </CartProvider>
+    </CategoriesProvider>
   );
 }
 

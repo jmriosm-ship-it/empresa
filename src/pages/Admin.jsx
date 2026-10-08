@@ -1,19 +1,40 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { sb } from "../lib/supabase";
-import { SIZE_SETS } from "../constants";
+import { DEFAULT_SIZES } from "../constants";
+import { useCategories } from "../context/CategoriesContext";
 import "../assets/admin.css";
 
 /* ---------- helpers ---------- */
 
 // Arma la lista de tallas con su casilla y cantidad (reemplaza renderSizeStockInputs)
-function buildSizeRows(category, existingStock = {}) {
+// categorySizes = tallas de la categoría; si el producto ya tenía otras tallas/stock, también se muestran para no perderlas
+function buildSizeRows(categorySizes, existingStock = {}, existingSizes = []) {
   const noStockYet = Object.keys(existingStock).length === 0;
-  return (SIZE_SETS[category] || []).map((size) => ({
+  const all = [...categorySizes];
+  [...existingSizes, ...Object.keys(existingStock)].forEach((sz) => {
+    if (!all.includes(sz)) all.push(sz);
+  });
+  return all.map((size) => ({
     size,
     checked: existingStock[size] !== undefined || noStockYet,
     qty: existingStock[size] !== undefined ? String(existingStock[size]) : "",
   }));
+}
+
+// "Gorras de Verano" -> "gorras-de-verano" (sin tildes ni símbolos)
+function slugify(text) {
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// "S, M, L" -> ["S","M","L"] (sin vacíos ni repetidos)
+function parseSizes(text) {
+  return [...new Set(text.split(",").map((x) => x.trim()).filter(Boolean))];
 }
 
 async function uploadImage(file) {
@@ -96,6 +117,10 @@ function LoginBox() {
 /* ---------- panel (formulario + lista de productos) ---------- */
 
 function AdminPanel({ email }) {
+  const { categories, bySlug } = useCategories();
+  const sizesOf = (slug) => bySlug[slug]?.sizes || DEFAULT_SIZES;
+  const firstSlug = categories[0]?.slug || "";
+
   const [products, setProducts] = useState(null); // null = cargando
   const [listError, setListError] = useState("");
 
@@ -103,8 +128,8 @@ function AdminPanel({ email }) {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("tshirts");
-  const [sizeRows, setSizeRows] = useState(() => buildSizeRows("tshirts"));
+  const [category, setCategory] = useState(firstSlug);
+  const [sizeRows, setSizeRows] = useState(() => buildSizeRows(sizesOf(firstSlug)));
   const [files, setFiles] = useState([null, null, null, null]);
   const [colors, setColors] = useState(["", "", "", ""]);
   const [fileKey, setFileKey] = useState(0); // cambiarlo "vacía" los <input type="file">
@@ -136,8 +161,8 @@ function AdminPanel({ email }) {
     setName("");
     setPrice("");
     setDescription("");
-    setCategory("tshirts");
-    setSizeRows(buildSizeRows("tshirts"));
+    setCategory(firstSlug);
+    setSizeRows(buildSizeRows(sizesOf(firstSlug)));
     setFiles([null, null, null, null]);
     setColors(["", "", "", ""]);
     setFileKey((k) => k + 1);
@@ -145,17 +170,17 @@ function AdminPanel({ email }) {
 
   function changeCategory(newCategory) {
     setCategory(newCategory);
-    setSizeRows(buildSizeRows(newCategory));
+    setSizeRows(buildSizeRows(sizesOf(newCategory)));
   }
 
   function startEdit(product) {
-    const cat = product.category || "tshirts";
+    const cat = product.category || firstSlug;
     setEditingId(product.id);
     setName(product.name || "");
     setPrice(product.price || "");
     setDescription(product.description || "");
     setCategory(cat);
-    const rows = buildSizeRows(cat, product.stock || {}).map((r) => ({
+    const rows = buildSizeRows(sizesOf(cat), product.stock || {}, product.sizes || []).map((r) => ({
       ...r,
       checked: (product.sizes || []).includes(r.size),
     }));
@@ -239,6 +264,8 @@ function AdminPanel({ email }) {
         <button className="btn-danger" onClick={() => sb.auth.signOut()}>Log out</button>
       </div>
 
+      <CategoriesBox />
+
       <div className="admin-box">
         <h3>{editingId ? "Edit product" : "Add product"}</h3>
 
@@ -262,9 +289,11 @@ function AdminPanel({ email }) {
         <div className="admin-field">
           <label>Category</label>
           <select value={category} onChange={(e) => changeCategory(e.target.value)}>
-            <option value="tshirts">T-Shirts</option>
-            <option value="shorts">Shorts</option>
-            <option value="alo">Alo</option>
+            {categories.map((c) => (
+              <option key={c.slug} value={c.slug}>{c.label}</option>
+            ))}
+            {/* producto viejo cuya categoría ya no existe: se muestra para no perderla al editar */}
+            {category && !bySlug[category] && <option value={category}>{category} (deleted category)</option>}
           </select>
         </div>
 
@@ -371,6 +400,154 @@ function AdminPanel({ email }) {
               );
             })}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- categorías (crear / editar / borrar, con su foto) ---------- */
+
+function CategoriesBox() {
+  const { categories, bySlug, reload } = useCategories();
+
+  const [editingSlug, setEditingSlug] = useState(null); // null = creando una nueva
+  const [label, setLabel] = useState("");
+  const [sizesText, setSizesText] = useState("S, M, L, XL, XXL");
+  const [order, setOrder] = useState("");
+  const [file, setFile] = useState(null);
+  const [fileKey, setFileKey] = useState(0);
+  const [msg, setMsg] = useState({ text: "", cls: "" });
+  const [busy, setBusy] = useState(false);
+
+  function resetForm() {
+    setEditingSlug(null);
+    setLabel("");
+    setSizesText("S, M, L, XL, XXL");
+    setOrder("");
+    setFile(null);
+    setFileKey((k) => k + 1);
+  }
+
+  function startEdit(c) {
+    setEditingSlug(c.slug);
+    setLabel(c.label);
+    setSizesText((c.sizes || []).join(", "));
+    setOrder(String(c.sort_order ?? ""));
+    setFile(null);
+    setFileKey((k) => k + 1);
+    setMsg({ text: "", cls: "" });
+  }
+
+  async function handleSave() {
+    const cleanLabel = label.trim();
+    const sizes = parseSizes(sizesText);
+    if (!cleanLabel) return setMsg({ text: "Please write the category name.", cls: "err" });
+    if (sizes.length === 0) return setMsg({ text: "Please write at least one size, separated by commas.", cls: "err" });
+
+    let slug = editingSlug;
+    if (!slug) {
+      slug = slugify(cleanLabel);
+      if (!slug || slug === "all") return setMsg({ text: "Please use a different name for this category.", cls: "err" });
+      if (bySlug[slug]) return setMsg({ text: `A category "${bySlug[slug].label}" already exists.`, cls: "err" });
+    }
+
+    const maxOrder = categories.reduce((m, c) => Math.max(m, c.sort_order || 0), 0);
+    const sortOrder = Number.isFinite(parseInt(order)) ? parseInt(order) : maxOrder + 1;
+
+    setBusy(true);
+    try {
+      const payload = { label: cleanLabel, sizes, sort_order: sortOrder };
+      if (file) {
+        setMsg({ text: "Uploading photo…", cls: "" });
+        payload.image_url = await uploadImage(file);
+      }
+      setMsg({ text: "Saving category…", cls: "" });
+      const { error } = editingSlug
+        ? await sb.from("categories").update(payload).eq("slug", editingSlug)
+        : await sb.from("categories").insert({ slug, ...payload });
+      if (error) throw error;
+      setMsg({ text: editingSlug ? "Category updated!" : "Category added!", cls: "ok" });
+      resetForm();
+      reload();
+    } catch (err) {
+      setMsg({ text: err.message || "Something went wrong.", cls: "err" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleDelete(c) {
+    const { count, error: countError } = await sb
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("category", c.slug);
+    if (countError) return setMsg({ text: countError.message, cls: "err" });
+    if (count > 0) {
+      return setMsg({
+        text: `"${c.label}" still has ${count} product${count === 1 ? "" : "s"}. Move them to another category or delete them first.`,
+        cls: "err",
+      });
+    }
+    if (!window.confirm(`Delete the category "${c.label}"?`)) return;
+    const { error } = await sb.from("categories").delete().eq("slug", c.slug);
+    if (error) return setMsg({ text: error.message, cls: "err" });
+    if (editingSlug === c.slug) resetForm();
+    setMsg({ text: "Category deleted.", cls: "ok" });
+    reload();
+  }
+
+  return (
+    <div className="admin-box">
+      <h3>{editingSlug ? `Edit category: ${bySlug[editingSlug]?.label ?? editingSlug}` : "Categories"}</h3>
+
+      <div className="admin-field">
+        <label>Name</label>
+        <input type="text" placeholder="Hoodies" value={label} onChange={(e) => setLabel(e.target.value)} />
+        {editingSlug && <p className="hint">The web address of this category stays the same: /shop?cat={editingSlug}</p>}
+      </div>
+      <div className="admin-field">
+        <label>Sizes (separated by commas)</label>
+        <input type="text" placeholder="S, M, L, XL" value={sizesText} onChange={(e) => setSizesText(e.target.value)} />
+        <p className="hint">Changing sizes only affects new products. Existing products keep the sizes they already have.</p>
+      </div>
+      <div className="admin-field">
+        <label>Position in the menu (optional)</label>
+        <input type="number" placeholder="Leave blank to put it last" value={order} onChange={(e) => setOrder(e.target.value)} />
+      </div>
+      <div className="admin-field" key={fileKey}>
+        <label>Cover photo (shown on the home page)</label>
+        <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0] || null)} />
+        <p className="hint">
+          Use a light photo (under ~500 KB), it loads on the first screen of the site.
+          {editingSlug && " Pick a new file only if you want to replace the current photo."}
+        </p>
+      </div>
+
+      <button className="btn-primary" onClick={handleSave} disabled={busy}>
+        {editingSlug ? "Save category" : "Add category"}
+      </button>
+      {editingSlug && <button className="btn-secondary" onClick={resetForm}>Cancel edit</button>}
+      <p className={`admin-msg ${msg.cls}`}>{msg.text}</p>
+
+      <div style={{ marginTop: "20px" }}>
+        {categories.map((c) => (
+          <div className="admin-product-row" key={c.slug}>
+            <img
+              className="admin-thumb"
+              src={c.image_url || undefined}
+              alt=""
+              onError={(e) => {
+                e.currentTarget.style.background = "var(--frame)";
+              }}
+            />
+            <div className="admin-product-info">
+              <h4>{c.label}</h4>
+              <span>/shop?cat={c.slug} · Sizes: {(c.sizes || []).join(", ")}</span>
+            </div>
+            <button className="btn-edit" onClick={() => startEdit(c)}>Edit</button>
+            <button className="btn-danger" onClick={() => handleDelete(c)}>Delete</button>
+          </div>
+        ))}
       </div>
     </div>
   );

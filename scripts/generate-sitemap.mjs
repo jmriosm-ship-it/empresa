@@ -11,11 +11,17 @@ const publicDir = resolve(root, "public");
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-const staticPaths = ["/", "/shop", "/shop?cat=tshirts", "/shop?cat=shorts", "/shop?cat=alo", "/contact", "/policies"];
-const urls = staticPaths.map((p) => ({ loc: SITE + p }));
+const urls = [];
+const addStatic = (p) => urls.push({ loc: SITE + p });
 
 try {
   const { sb } = await import("../src/lib/supabase.js");
+
+  // categorías desde Supabase (si falla o no existe la tabla, se usan las 3 de siempre)
+  let slugs = ["tshirts", "shorts", "alo"];
+  const cats = await sb.from("categories").select("slug").order("sort_order");
+  if (!cats.error && cats.data) slugs = cats.data.map((c) => c.slug);
+  ["/", "/shop", ...slugs.map((sl) => `/shop?cat=${sl}`), "/contact", "/policies"].forEach(addStatic);
   const { data, error } = await sb.from("products").select("id, created_at");
   if (error) throw error;
   for (const p of data || []) {
@@ -26,7 +32,10 @@ try {
   }
   console.log(`[sitemap] ${data?.length ?? 0} productos incluidos`);
 } catch (e) {
-  console.warn("[sitemap] No se pudieron leer los productos, se genera solo con páginas fijas:", e?.message || e);
+  console.warn("[sitemap] No se pudo leer Supabase, se genera solo con páginas fijas:", e?.message || e);
+  if (urls.length === 0) {
+    ["/", "/shop", "/shop?cat=tshirts", "/shop?cat=shorts", "/shop?cat=alo", "/contact", "/policies"].forEach(addStatic);
+  }
 }
 
 const xml =

@@ -1,7 +1,19 @@
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
+import { useCategories } from "../context/CategoriesContext";
+
+// Si la categoría tiene foto subida desde /admin, se usa esa; si no, queda la foto local (clase cat-<slug>) o el fondo liso
+const tileStyle = (c) =>
+  c.image_url
+    ? {
+        backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.65)), url("${c.image_url}")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }
+    : undefined;
 
 export default function Home() {
+  const { categories } = useCategories();
   return (
     <>
       <section className="hero">
@@ -15,18 +27,12 @@ export default function Home() {
       </section>
 
       <div className="cat-grid">
-        <Link to="/shop?cat=tshirts" className="cat-tile cat-tshirts">
-          <small>2026 / SEPTEMBER</small>
-          <span>T-SHIRTS</span>
-        </Link>
-        <Link to="/shop?cat=shorts" className="cat-tile cat-shorts">
-          <small>2026 / SEPTEMBER</small>
-          <span>SHORTS</span>
-        </Link>
-        <Link to="/shop?cat=alo" className="cat-tile cat-alo">
-          <small>2026 / SEPTEMBER</small>
-          <span>ALO</span>
-        </Link>
+        {categories.map((c) => (
+          <Link key={c.slug} to={`/shop?cat=${c.slug}`} className={`cat-tile cat-${c.slug}`} style={tileStyle(c)}>
+            <small>2026 / SEPTEMBER</small>
+            <span>{c.label.toUpperCase()}</span>
+          </Link>
+        ))}
       </div>
 
       <section className="contact-list" style={{ paddingBottom: "20px" }}>

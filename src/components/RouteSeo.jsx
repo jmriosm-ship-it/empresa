@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import { CATEGORY_LABELS } from "../constants";
+import { useCategories } from "../context/CategoriesContext";
 import useSeo from "../hooks/useSeo";
 
 const BRAND = "SYNKD Streetwear";
@@ -26,13 +26,14 @@ const PAGES = {
 export default function RouteSeo() {
   const { pathname, search } = useLocation();
   const params = new URLSearchParams(search);
+  const { bySlug } = useCategories();
 
   let seo;
   let path = pathname;
 
   if (pathname === "/shop") {
     const cat = params.get("cat");
-    const label = cat && CATEGORY_LABELS[cat] ? CATEGORY_LABELS[cat] : null;
+    const label = cat && bySlug[cat] ? bySlug[cat].label : null;
     seo = label
       ? { title: `${label} | ${BRAND}`, description: `Shop ${label} from SYNKD Streetwear — small batch streetwear drops.` }
       : { title: `Shop | ${BRAND}`, description: "Shop all SYNKD Streetwear pieces: T-shirts, shorts and Alo. Small batch drops." };

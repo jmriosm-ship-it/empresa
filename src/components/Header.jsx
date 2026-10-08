@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useCategories } from "../context/CategoriesContext";
 
 export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { cartCount } = useCart();
+  const { categories } = useCategories();
   const { pathname, search } = useLocation();
   const cat = new URLSearchParams(search).get("cat");
 
@@ -58,9 +60,11 @@ export default function Header() {
         <ul className="drawer-nav">
           <li><Link to="/" className={active("/")} onClick={closeDrawer}>Home</Link></li>
           <li><Link to="/shop" className={active("/shop")} onClick={closeDrawer}>Shop All</Link></li>
-          <li><Link to="/shop?cat=tshirts" className={active("/shop", "tshirts")} onClick={closeDrawer}>T-Shirts</Link></li>
-          <li><Link to="/shop?cat=shorts" className={active("/shop", "shorts")} onClick={closeDrawer}>Shorts</Link></li>
-          <li><Link to="/shop?cat=alo" className={active("/shop", "alo")} onClick={closeDrawer}>Alo</Link></li>
+          {categories.map((c) => (
+            <li key={c.slug}>
+              <Link to={`/shop?cat=${c.slug}`} className={active("/shop", c.slug)} onClick={closeDrawer}>{c.label}</Link>
+            </li>
+          ))}
           <li><Link to="/cart" className={active("/cart")} onClick={closeDrawer}>Cart</Link></li>
           <li><Link to="/policies" className={active("/policies")} onClick={closeDrawer}>Policies</Link></li>
           <li><Link to="/contact" className={active("/contact")} onClick={closeDrawer}>Contact</Link></li>
