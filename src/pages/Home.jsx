@@ -17,7 +17,7 @@ export default function Home() {
   return (
     <>
       <section className="hero">
-        <span className="hero-tag">Octuber 2026 CATALOG</span>
+        <span className="hero-tag">OCTOBER 2026 CATALOG</span>
         <h1>SYNKD<br />STREETWEAR</h1>
         <p>Small batch drops. Loud graphics. Built for the street, not the shelf.</p>
         <div className="hero-cta">
